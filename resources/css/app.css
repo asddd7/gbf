@@ -1,3 +1,410 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+
+/* =========================================
+   GBF CALCULATOR - GLOBAL STYLES
+========================================= */
+
+:root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-light: #eef2ff;
+
+    --background: #f8fafc;
+    --surface: #ffffff;
+
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+
+    --border: #e2e8f0;
+
+    --danger: #dc2626;
+    --danger-hover: #b91c1c;
+
+    --sidebar-width: 260px;
+
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    min-height: 100%;
+}
+
+body {
+    min-height: 100vh;
+    background: var(--background);
+    color: var(--text-primary);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+/* =========================================
+   DARK MODE
+========================================= */
+
+body.dark {
+    --background: #0a0a0a;
+    --surface: #121212;
+
+    --text-primary: #f1f5f9;
+    --text-secondary: #9ca3af;
+
+    --border: #262626;
+    --primary-light: #25234a;
+}
+
+/* =========================================
+   MAIN LAYOUT
+========================================= */
+
+.app-layout {
+    min-height: 100vh;
+}
+
+.main-wrapper {
+    min-height: 100vh;
+    margin-left: var(--sidebar-width);
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================================
+   SIDEBAR
+========================================= */
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    width: var(--sidebar-width);
+    height: 100vh;
+
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+}
+
+.sidebar-brand {
+    height: 65px;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+
+    border-bottom: 1px solid var(--border);
+}
+
+.brand-link {
+    color: var(--primary);
+    font-size: 19px;
+    font-weight: 750;
+    letter-spacing: -0.5px;
+}
+
+.sidebar-navigation {
+    padding: 20px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 11px 14px;
+    border-radius: 9px;
+
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-link:hover {
+    background: var(--background);
+    color: var(--primary);
+}
+
+.nav-link.active {
+    background: var(--primary-light);
+    color: var(--primary);
+    font-weight: 650;
+}
+
+.sidebar-footer {
+    padding: 17px;
+    border-top: 1px solid var(--border);
+
+    color: var(--text-secondary);
+    font-size: 12px;
+    text-align: center;
+}
+
+/* =========================================
+   HEADER
+========================================= */
+
+.app-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+
+    min-height: 65px;
+    padding: 0 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+.header-title {
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 650;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-name {
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 38px;
+    padding: 8px 15px;
+
+    border: 1px solid transparent;
+    border-radius: 8px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.button-primary {
+    color: #ffffff;
+    background: var(--primary);
+}
+
+.button-primary:hover {
+    background: var(--primary-hover);
+}
+
+.button-outline {
+    color: var(--text-primary);
+    background: transparent;
+    border-color: var(--border);
+}
+
+.button-outline:hover {
+    background: var(--background);
+}
+
+.button-danger {
+    color: #ffffff;
+    background: var(--danger);
+}
+
+.button-danger:hover {
+    background: var(--danger-hover);
+}
+
+/* =========================================
+   MAIN CONTENT
+========================================= */
+
+.main-content {
+    flex: 1;
+    width: 100%;
+    padding: 30px;
+}
+
+.page-heading {
+    margin-bottom: 24px;
+}
+
+.page-title {
+    color: var(--text-primary);
+    font-size: 25px;
+    font-weight: 750;
+    letter-spacing: -0.6px;
+}
+
+.page-description {
+    margin-top: 5px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+/* =========================================
+   DASHBOARD
+========================================= */
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.dashboard-card {
+    grid-column: span 12;
+
+    padding: 25px;
+
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 13px;
+
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.035);
+}
+
+.dashboard-card h2 {
+    margin-bottom: 9px;
+    color: var(--text-primary);
+    font-size: 19px;
+    font-weight: 700;
+}
+
+.dashboard-card p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+/* =========================================
+   AUTH LINKS
+========================================= */
+
+.auth-link {
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.auth-link:hover {
+    color: var(--primary);
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 767px) {
+    :root {
+        --sidebar-width: 0px;
+    }
+
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+    }
+
+    .sidebar-brand {
+        height: 58px;
+        padding: 0 18px;
+    }
+
+    .sidebar-navigation {
+        padding: 10px 12px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .nav-link {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .sidebar-footer {
+        display: none;
+    }
+
+    .main-wrapper {
+        margin-left: 0;
+        min-height: auto;
+    }
+
+    .app-header {
+        min-height: 58px;
+        padding: 0 18px;
+    }
+
+    .header-title {
+        font-size: 14px;
+    }
+
+    .header-actions {
+        gap: 8px;
+    }
+
+    .user-name {
+        display: none;
+    }
+
+    .main-content {
+        padding: 20px 16px;
+    }
+
+    .page-title {
+        font-size: 22px;
+    }
+
+    .dashboard-card {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 380px) {
+    .nav-link {
+        font-size: 11px;
+        padding: 7px 8px;
+    }
+
+    .app-header {
+        padding: 0 12px;
+    }
+}
