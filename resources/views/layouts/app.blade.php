@@ -16,101 +16,54 @@
 
     <div class="app-layout">
 
-        <!-- SIDEBAR -->
-        <aside class="sidebar">
+        <!-- HEADER -->
+        <header class="app-header">
 
-            <div>
-                <!-- LOGO -->
-                <div class="sidebar-brand">
-                    <a href="{{ route('dashboard') }}" class="brand-link">
-                        GBF Calculator
+            <!-- LOGO -->
+            <a href="{{ route('dashboard') }}" class="brand-link">
+                GBF Calculator
+            </a>
+
+            <!-- HEADER RIGHT -->
+            <div class="header-actions">
+
+                @auth
+
+                    <span class="user-name">
+                        {{ Auth::user()->name ?? Auth::user()->email }}
+                    </span>
+
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+
+                        <button type="submit" class="button button-danger">
+                            Logout
+                        </button>
+                    </form>
+
+                @else
+
+                    <a href="{{ route('login') }}" class="auth-link">
+                        Masuk
                     </a>
-                </div>
 
-                <!-- NAVIGATION -->
-                <nav class="sidebar-navigation">
-
-                    <a href="{{ route('dashboard') }}"
-                       class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                        Dashboard
-                    </a>
-
-                    <a href="#" class="nav-link">
-                        Eternals Tracker
-                    </a>
-
-                    <a href="#" class="nav-link">
-                        Evokers Tracker
-                    </a>
-
-                    <a href="#" class="nav-link">
-                        Materials Inventory
-                    </a>
-
-                </nav>
-            </div>
-
-            <!-- SIDEBAR FOOTER -->
-            <div class="sidebar-footer">
-                GBF Calculator v1.0.0
-            </div>
-
-        </aside>
-
-        <!-- MAIN WRAPPER -->
-        <div class="main-wrapper">
-
-            <!-- HEADER -->
-            <header class="app-header">
-
-                <div>
-                    <h2 class="header-title">
-                        @yield('page_title', 'Overview')
-                    </h2>
-                </div>
-
-                <!-- HEADER RIGHT -->
-                <div class="header-actions">
-
-                    @auth
-
-                        <span class="user-name">
-                            {{ Auth::user()->name ?? Auth::user()->email }}
-                        </span>
-
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-
-                            <button type="submit" class="button button-danger">
-                                Logout
-                            </button>
-                        </form>
-
-                    @else
-
-                        <a href="{{ route('login') }}" class="auth-link">
-                            Masuk
+                    @if (Route::has('register'))
+                        <a href="{{ route('register') }}"
+                           class="button button-primary">
+                            Daftar
                         </a>
+                    @endif
 
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}"
-                               class="button button-primary">
-                                Daftar
-                            </a>
-                        @endif
+                @endauth
 
-                    @endauth
+            </div>
 
-                </div>
+        </header>
 
-            </header>
-
-            <!-- MAIN CONTENT -->
-            <main class="main-content">
-                @yield('content')
-            </main>
-
-        </div>
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            @yield('content')
+        </main>
 
     </div>
 
