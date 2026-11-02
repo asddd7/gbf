@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\GbfCharacter;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -36,6 +39,13 @@ class GbfCharacterController extends Controller
             $validated['slug'] ?? $validated['name']
         );
 
+        if ($request->hasFile('image')) {
+            $validated['image_path'] = $this->uploadCharacterImage(
+                $request->file('image'),
+                $validated['slug']
+            );
+        }
+
         GbfCharacter::create($validated);
 
         return redirect()
@@ -58,6 +68,13 @@ class GbfCharacterController extends Controller
             $validated['slug'] ?? $validated['name'],
             $character->id
         );
+
+        if ($request->hasFile('image')) {
+            $validated['image_path'] = $this->uploadCharacterImage(
+                $request->file('image'),
+                $validated['slug']
+            );
+        }
 
         $character->update($validated);
 
@@ -106,10 +123,11 @@ class GbfCharacterController extends Controller
                 'string',
             ],
 
-            'image_path' => [
+            'image' => [
                 'nullable',
-                'string',
-                'max:255',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:5120',
             ],
 
             'sort_order' => [
@@ -119,6 +137,73 @@ class GbfCharacterController extends Controller
                 'max:65535',
             ],
         ]);
+    }
+
+    private function uploadCharacterImage($file, string $slug): string
+    {
+        $cloudName = config('services.cloudinary.cloud_name');
+        $apiKey = config('services.cloudinary.api_key');
+        $apiSecret = config('services.cloudinary.api_secret');
+
+        if (!$cloudName || !$apiKey || !$apiSecret) {
+            throw ValidationException::withMessages([
+                'image' => 'Konfigurasi Cloudinary belum lengkap.',
+            ]);
+        }
+
+        $timestamp = time();
+
+        $publicId = 'gbf/characters/' . $slug . '-' . Str::uuid();
+
+        $transformation = 'c_fill,g_auto,h_600,w_600';
+
+        $signatureString =
+            'public_id=' . $publicId .
+            '&timestamp=' . $timestamp .
+            '&transformation=' . $transformation .
+            $apiSecret;
+
+        $signature = sha1($signatureString);
+
+        try {
+            $response = Http::timeout(30)
+                ->attach(
+                    'file',
+                    file_get_contents($file->getRealPath()),
+                    $file->getClientOriginalName()
+                )
+                ->post("https://api.cloudinary.com/v1_1/{$cloudName}/image/upload", [
+                    'api_key' => $apiKey,
+                    'timestamp' => $timestamp,
+                    'public_id' => $publicId,
+                    'transformation' => $transformation,
+                    'signature' => $signature,
+                ]);
+
+            if (!$response->successful() || !$response->json('secure_url')) {
+                Log::error('Cloudinary upload failed', [
+                    'status' => $response->status(),
+                    'response' => $response->json(),
+                ]);
+
+                throw ValidationException::withMessages([
+                    'image' => 'Gagal mengunggah gambar ke Cloudinary.',
+                ]);
+            }
+
+            return $response->json('secure_url');
+
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (\Throwable $exception) {
+            Log::error('Cloudinary connection error', [
+                'message' => $exception->getMessage(),
+            ]);
+
+            throw ValidationException::withMessages([
+                'image' => 'Tidak dapat menghubungi Cloudinary. Silakan coba lagi.',
+            ]);
+        }
     }
 
     private function makeUniqueSlug(

@@ -1,6 +1,7 @@
 
 @php
     $isEdit = isset($character);
+    $currentImage = old('image_path', $character->image_path ?? null);
 @endphp
 
 <div class="admin-form-grid">
@@ -73,16 +74,42 @@
         @error('sort_order') <small class="field-error">{{ $message }}</small> @enderror
     </div>
 
-    <div class="admin-form-group">
-        <label for="image_path">Image Path / URL</label>
-        <input
-            type="text"
-            id="image_path"
-            name="image_path"
-            value="{{ old('image_path', $character->image_path ?? '') }}"
-            placeholder="https://example.com/image.png"
-        >
-        @error('image_path') <small class="field-error">{{ $message }}</small> @enderror
+    <div class="admin-form-group admin-form-full">
+        <label for="image">Gambar Character</label>
+
+        <div class="character-image-upload">
+            <div class="character-image-preview">
+                <img
+                    id="imagePreview"
+                    src="{{ $currentImage ?? '' }}"
+                    alt="Preview Character"
+                    @if (!$currentImage) hidden @endif
+                >
+
+                <div id="imagePlaceholder" @if ($currentImage) hidden @endif>
+                    <span>+</span>
+                    <small>Preview 1:1</small>
+                </div>
+            </div>
+
+            <div class="character-image-controls">
+                <input
+                    type="file"
+                    name="image"
+                    id="image"
+                    accept="image/jpeg,image/png,image/webp"
+                >
+
+                <small>
+                    JPG, PNG, atau WEBP. Maksimal 5 MB.
+                    Gambar akan dipotong menjadi 600 × 600 px.
+                </small>
+
+                @error('image')
+                    <small class="field-error">{{ $message }}</small>
+                @enderror
+            </div>
+        </div>
     </div>
 
     <div class="admin-form-group admin-form-full">
@@ -106,3 +133,41 @@
         {{ $isEdit ? 'Simpan Perubahan' : 'Tambah Character' }}
     </button>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const input = document.getElementById('image');
+    const preview = document.getElementById('imagePreview');
+    const placeholder = document.getElementById('imagePlaceholder');
+
+    let previewUrl = null;
+
+    input.addEventListener('change', function () {
+        const file = this.files[0];
+
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+            previewUrl = null;
+        }
+
+        if (!file) return;
+
+        if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+            this.value = '';
+            alert('Format gambar harus JPG, PNG, atau WEBP.');
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            this.value = '';
+            alert('Ukuran gambar maksimal 5 MB.');
+            return;
+        }
+
+        previewUrl = URL.createObjectURL(file);
+        preview.src = previewUrl;
+        preview.hidden = false;
+        placeholder.hidden = true;
+    });
+});
+</script>

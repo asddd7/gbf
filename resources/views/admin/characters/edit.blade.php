@@ -21,6 +21,7 @@
         <form
             method="POST"
             action="{{ route('admin.characters.update', $character) }}"
+            enctype="multipart/form-data"
         >
             @csrf
             @method('PUT')

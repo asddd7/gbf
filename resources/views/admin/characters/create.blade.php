@@ -18,7 +18,9 @@
     </div>
 
     <div class="admin-panel admin-form-panel">
-        <form method="POST" action="{{ route('admin.characters.store') }}">
+        <form method="POST"
+            action="{{ route('admin.characters.store') }}"
+            enctype="multipart/form-data">
             @csrf
             @include('admin.characters._form')
         </form>
