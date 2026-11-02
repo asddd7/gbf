@@ -3,10 +3,6 @@
 
 @section('title', 'Tambah Character - Admin GBF')
 
-@push('styles')
-    @vite('resources/css/admin.css')
-@endpush
-
 @section('content')
 <div class="admin-page">
     <div class="admin-heading">

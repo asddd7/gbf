@@ -1,15 +1,32 @@
+
 @extends('layouts.app')
 
 @section('title', 'Admin Dashboard - GBF Calculator')
 
 @section('content')
-    <div class="container mx-auto px-4 py-6">
-        <h1 class="text-2xl font-bold">
-            Admin Dashboard
-        </h1>
-
-        <p class="mt-2">
-            Selamat datang, {{ auth()->user()->name }}.
-        </p>
+<div class="admin-page">
+    <div class="admin-heading">
+        <div>
+            <span class="admin-eyebrow">GBF CALCULATOR</span>
+            <h1>Admin Dashboard</h1>
+            <p>Selamat datang, {{ auth()->user()->name }}.</p>
+        </div>
     </div>
+
+    <div class="admin-panel">
+        <div class="admin-panel-heading">
+            <h2>Data Management</h2>
+            <p>Kelola data yang digunakan oleh GBF Calculator.</p>
+        </div>
+
+        <div style="padding: 20px;">
+            <a
+                href="{{ route('admin.characters.index') }}"
+                class="admin-button admin-button-primary"
+            >
+                Kelola Characters →
+            </a>
+        </div>
+    </div>
+</div>
 @endsection
