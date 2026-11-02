@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Str;
 
-$mysqlSslCa = env('MYSQL_ATTR_SSL_CA');
+$mysqlSslCa = env('DB_AIVEN_SSL_CA', env('MYSQL_ATTR_SSL_CA'));
 $mysqlSslCa = $mysqlSslCa ? base_path($mysqlSslCa) : null;
 
 return [
@@ -54,6 +54,46 @@ return [
             'username' => env('DB_USERNAME', 'root'),
             'password' => env('DB_PASSWORD', ''),
             'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => env('DB_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                (defined('Pdo\Mysql::ATTR_SSL_CA')
+                    ? constant('Pdo\Mysql::ATTR_SSL_CA')
+                    : constant('PDO::MYSQL_ATTR_SSL_CA')) => $mysqlSslCa,
+            ]) : [],
+        ],
+
+        'mysql_local' => [
+            'driver' => 'mysql',
+            'url' => env('DB_LOCAL_URL'),
+            'host' => env('DB_LOCAL_HOST', '127.0.0.1'),
+            'port' => env('DB_LOCAL_PORT', '3306'),
+            'database' => env('DB_LOCAL_DATABASE', 'gbf'),
+            'username' => env('DB_LOCAL_USERNAME', 'root'),
+            'password' => env('DB_LOCAL_PASSWORD', ''),
+            'unix_socket' => env('DB_LOCAL_SOCKET', ''),
+            'charset' => env('DB_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => [],
+        ],
+
+        'mysql_aiven' => [
+            'driver' => 'mysql',
+            'url' => env('DB_AIVEN_URL'),
+            'host' => env('DB_AIVEN_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('DB_AIVEN_PORT', env('DB_PORT', '3306')),
+            'database' => env('DB_AIVEN_DATABASE', env('DB_DATABASE', 'laravel')),
+            'username' => env('DB_AIVEN_USERNAME', env('DB_USERNAME', 'root')),
+            'password' => env('DB_AIVEN_PASSWORD', env('DB_PASSWORD', '')),
+            'unix_socket' => '',
             'charset' => env('DB_CHARSET', 'utf8mb4'),
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
             'prefix' => '',
