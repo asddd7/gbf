@@ -3,6 +3,10 @@
 
 @section('title', 'Admin Dashboard - GBF Calculator')
 
+@push('styles')
+    @vite('resources/css/admin.css')
+@endpush
+
 @section('content')
 <div class="admin-page">
     <div class="admin-heading">
@@ -19,7 +23,7 @@
             <p>Kelola data yang digunakan oleh GBF Calculator.</p>
         </div>
 
-        <div style="padding: 20px;">
+        <div class="admin-panel-body">
             <a
                 href="{{ route('admin.characters.index') }}"
                 class="admin-button admin-button-primary"
