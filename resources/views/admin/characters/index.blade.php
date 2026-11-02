@@ -44,8 +44,6 @@
                         <th>Character</th>
                         <th>Type</th>
                         <th>Element</th>
-                        <th>Stages</th>
-                        <th>Urutan</th>
                         <th class="text-right">Aksi</th>
                     </tr>
                 </thead>
@@ -81,8 +79,6 @@
                             </td>
 
                             <td>{{ $character->element ?: '-' }}</td>
-                            <td>{{ $character->stages_count }}</td>
-                            <td>{{ $character->sort_order }}</td>
 
                             <td>
                                 <div class="admin-actions">
