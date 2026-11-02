@@ -1,52 +1,109 @@
-<x-guest-layout>
-    <form method="POST" action="{{ route('register') }}">
+
+@extends('layouts.app')
+
+@section('title', 'Daftar - GBF Calculator')
+
+@push('styles')
+    @vite('resources/css/auth.css')
+@endpush
+
+@section('content')
+
+<div class="auth-page">
+
+    <div class="auth-heading">
+        <h1 class="auth-title">Buat Akun</h1>
+        <p class="auth-description">
+            Daftar untuk mulai menggunakan GBF Calculator.
+        </p>
+    </div>
+
+    @if ($errors->any())
+        <div class="auth-errors">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form method="POST" action="{{ route('register') }}" class="auth-form">
         @csrf
 
-        <!-- Name -->
-        <div>
-            <x-input-label for="name" :value="__('Name')" />
-            <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
-            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+        <div class="auth-field">
+            <label for="name" class="auth-label">Nama</label>
+
+            <input
+                id="name"
+                class="auth-input"
+                type="text"
+                name="name"
+                value="{{ old('name') }}"
+                placeholder="Masukkan nama"
+                required
+                autofocus
+                autocomplete="name"
+            >
         </div>
 
-        <!-- Email Address -->
-        <div class="mt-4">
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <div class="auth-field">
+            <label for="email" class="auth-label">Email</label>
+
+            <input
+                id="email"
+                class="auth-input"
+                type="email"
+                name="email"
+                value="{{ old('email') }}"
+                placeholder="Masukkan email"
+                required
+                autocomplete="username"
+            >
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+        <div class="auth-field">
+            <label for="password" class="auth-label">Password</label>
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+            <input
+                id="password"
+                class="auth-input"
+                type="password"
+                name="password"
+                placeholder="Buat password"
+                required
+                autocomplete="new-password"
+            >
         </div>
 
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
+        <div class="auth-field">
+            <label for="password_confirmation" class="auth-label">
+                Konfirmasi Password
+            </label>
 
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                            type="password"
-                            name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+            <input
+                id="password_confirmation"
+                class="auth-input"
+                type="password"
+                name="password_confirmation"
+                placeholder="Ulangi password"
+                required
+                autocomplete="new-password"
+            >
         </div>
 
-        <div class="flex items-center justify-end mt-4">
-            <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
-                {{ __('Already registered?') }}
-            </a>
-
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
-            </x-primary-button>
-        </div>
+        <button type="submit" class="auth-submit">
+            Daftar
+        </button>
     </form>
-</x-guest-layout>
+
+    <div class="auth-footer">
+        Sudah punya akun?
+        <a href="{{ route('login') }}" class="auth-link">
+            Masuk
+        </a>
+    </div>
+
+</div>
+
+@endsection

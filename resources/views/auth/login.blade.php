@@ -1,47 +1,89 @@
-<x-guest-layout>
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <form method="POST" action="{{ route('login') }}">
+@extends('layouts.app')
+
+@section('title', 'Masuk - GBF Calculator')
+
+@push('styles')
+    @vite('resources/css/auth.css')
+@endpush
+
+@section('content')
+
+<div class="auth-page">
+
+    <div class="auth-heading">
+        <h1 class="auth-title">Selamat Datang</h1>
+        <p class="auth-description">
+            Masuk ke akun GBF Calculator kamu.
+        </p>
+    </div>
+
+    @if (session('status'))
+        <div class="auth-errors">
+            {{ session('status') }}
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="auth-errors">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form method="POST" action="{{ route('login') }}" class="auth-form">
         @csrf
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <div class="auth-field">
+            <label for="email" class="auth-label">Email</label>
+
+            <input
+                id="email"
+                class="auth-input"
+                type="email"
+                name="email"
+                value="{{ old('email') }}"
+                placeholder="Masukkan email"
+                required
+                autofocus
+                autocomplete="username"
+            >
         </div>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
+        <div class="auth-field">
+            <label for="password" class="auth-label">Password</label>
 
-            <x-text-input id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
-
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+            <input
+                id="password"
+                class="auth-input"
+                type="password"
+                name="password"
+                placeholder="Masukkan password"
+                required
+                autocomplete="current-password"
+            >
         </div>
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember_me" class="inline-flex items-center">
-                <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500" name="remember">
-                <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
-            </label>
-        </div>
+        <label class="auth-checkbox">
+            <input type="checkbox" name="remember" value="1">
+            <span>Ingat saya</span>
+        </label>
 
-        <div class="flex items-center justify-end mt-4">
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
-                    {{ __('Forgot your password?') }}
-                </a>
-            @endif
-
-            <x-primary-button class="ms-3">
-                {{ __('Log in') }}
-            </x-primary-button>
-        </div>
+        <button type="submit" class="auth-submit">
+            Masuk
+        </button>
     </form>
-</x-guest-layout>
+
+    <div class="auth-footer">
+        Belum punya akun?
+        <a href="{{ route('register') }}" class="auth-link">
+            Daftar sekarang
+        </a>
+    </div>
+
+</div>
+
+@endsection
