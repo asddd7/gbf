@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\GbfCharacterController;
+use App\Http\Controllers\Admin\GbfMaterialController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
@@ -15,6 +16,9 @@ Route::middleware(['auth', 'role:admin'])
         })->name('dashboard');
 
         Route::resource('characters', GbfCharacterController::class)
+            ->except(['show']);
+
+        Route::resource('materials', GbfMaterialController::class)
             ->except(['show']);
     });
 

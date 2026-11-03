@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\GbfCharacter;
+use App\Models\GbfCharacterStage;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
@@ -34,6 +37,8 @@ class GbfCharacterController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $this->validateCharacter($request);
+        $stages = $validated['stages'] ?? [];
+        unset($validated['stages']);
 
         $validated['slug'] = $this->makeUniqueSlug(
             $validated['slug'] ?? $validated['name']
@@ -46,7 +51,10 @@ class GbfCharacterController extends Controller
             );
         }
 
-        GbfCharacter::create($validated);
+        DB::transaction(function () use ($validated, $stages): void {
+            $character = GbfCharacter::create($validated);
+            $this->syncStages($character, $stages);
+        });
 
         return redirect()
             ->route('admin.characters.index')
@@ -55,6 +63,8 @@ class GbfCharacterController extends Controller
 
     public function edit(GbfCharacter $character): View
     {
+        $character->load('stages');
+
         return view('admin.characters.edit', compact('character'));
     }
 
@@ -63,6 +73,8 @@ class GbfCharacterController extends Controller
         GbfCharacter $character
     ): RedirectResponse {
         $validated = $this->validateCharacter($request, $character);
+        $stages = $validated['stages'] ?? [];
+        unset($validated['stages']);
 
         $validated['slug'] = $this->makeUniqueSlug(
             $validated['slug'] ?? $validated['name'],
@@ -76,7 +88,10 @@ class GbfCharacterController extends Controller
             );
         }
 
-        $character->update($validated);
+        DB::transaction(function () use ($validated, $character, $stages): void {
+            $character->update($validated);
+            $this->syncStages($character, $stages);
+        });
 
         return redirect()
             ->route('admin.characters.index')
@@ -96,6 +111,10 @@ class GbfCharacterController extends Controller
         Request $request,
         ?GbfCharacter $character = null
     ): array {
+        $existingStageIds = $character
+            ? $character->stages()->pluck('id')->all()
+            : [];
+
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
 
@@ -136,7 +155,66 @@ class GbfCharacterController extends Controller
                 'min:0',
                 'max:65535',
             ],
+
+            'stages' => ['nullable', 'array'],
+            'stages.*.id' => [
+                'nullable',
+                'integer',
+                Rule::exists('gbf_character_stages', 'id')
+                    ->where('character_id', $character?->id ?? 0),
+            ],
+            'stages.*.stage_key' => [
+                'required',
+                'string',
+                'max:80',
+                'distinct',
+                Rule::unique('gbf_character_stages', 'stage_key')
+                    ->where(fn (Builder $query) => $query->where(
+                        'character_id',
+                        $character?->id ?? 0
+                    ))
+                    ->whereNotIn('id', $existingStageIds),
+            ],
+            'stages.*.name' => ['required', 'string', 'max:255'],
+            'stages.*.description' => ['nullable', 'string'],
+            'stages.*.sort_order' => [
+                'required',
+                'integer',
+                'min:0',
+                'max:65535',
+            ],
         ]);
+    }
+
+    private function syncStages(GbfCharacter $character, array $stages): void
+    {
+        $stageIds = collect($stages)
+            ->pluck('id')
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        if ($stageIds === []) {
+            $character->stages()->delete();
+        } else {
+            $character->stages()->whereNotIn('id', $stageIds)->delete();
+        }
+
+        foreach ($stages as $stage) {
+            $stageId = $stage['id'] ?? null;
+            unset($stage['id']);
+
+            if ($stageId) {
+                GbfCharacterStage::query()
+                    ->where('character_id', $character->id)
+                    ->whereKey($stageId)
+                    ->update($stage);
+
+                continue;
+            }
+
+            $character->stages()->create($stage);
+        }
     }
 
     private function uploadCharacterImage($file, string $slug): string

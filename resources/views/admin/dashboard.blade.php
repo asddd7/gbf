@@ -30,6 +30,12 @@
             >
                 Kelola Characters →
             </a>
+            <a
+                href="{{ route('admin.materials.index') }}"
+                class="admin-button admin-button-secondary"
+            >
+                Kelola Materials →
+            </a>
         </div>
     </div>
 </div>

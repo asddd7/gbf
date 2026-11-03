@@ -57,6 +57,21 @@
                         </svg>
                         <span>Characters</span>
                     </a>
+
+                    <a
+                        href="{{ route('admin.materials.index') }}"
+                        @class([
+                            'admin-nav-link',
+                            'is-active' => request()->routeIs('admin.materials.*'),
+                        ])
+                        @if (request()->routeIs('admin.materials.*')) aria-current="page" @endif
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M5.25 4.5h13.5v15H5.25v-15Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                            <path d="M8.25 8.25h7.5M8.25 12h7.5M8.25 15.75h4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                        </svg>
+                        <span>Materials</span>
+                    </a>
                 </nav>
 
                 <div class="admin-sidebar-footer">
