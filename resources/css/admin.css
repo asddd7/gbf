@@ -394,6 +394,59 @@
     padding-top: 18px;
 }
 
+.progression-character-name {
+    margin: 5px 0 0;
+    font-size: 18px;
+    font-weight: 750;
+}
+
+.progression-character-link {
+    color: var(--admin-primary);
+    font-weight: 700;
+}
+
+.progression-character-link:hover {
+    text-decoration: underline;
+}
+
+.progression-detail-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.progression-detail-list {
+    display: grid;
+    gap: 16px;
+}
+
+.progression-detail-stage-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.progression-detail-stage-heading h2 {
+    margin: 3px 0 0;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.progression-detail-table {
+    min-width: 420px;
+}
+
+.progression-detail-table th:nth-child(2),
+.progression-detail-table td:nth-child(2) {
+    width: 140px;
+    text-align: right;
+}
+
+.progression-detail-table th:nth-child(3),
+.progression-detail-table td:nth-child(3) {
+    width: 160px;
+}
+
 .material-cell {
     display: flex;
     min-width: 190px;

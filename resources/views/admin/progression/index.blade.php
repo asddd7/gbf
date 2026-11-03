@@ -37,16 +37,34 @@
                 <thead>
                     <tr>
                         <th>Nama Character</th>
+                        <th class="text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($characters as $character)
                         <tr>
-                            <td><strong>{{ $character->name }}</strong></td>
+                            <td>
+                                <a
+                                    href="{{ route('admin.progression.show', $character) }}"
+                                    class="progression-character-link"
+                                >
+                                    {{ $character->name }}
+                                </a>
+                            </td>
+                            <td>
+                                <div class="admin-actions">
+                                    <a
+                                        href="{{ route('admin.progression.edit', $character) }}"
+                                        class="admin-button admin-button-secondary"
+                                    >
+                                        Edit
+                                    </a>
+                                </div>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td class="admin-empty">
+                            <td colspan="2" class="admin-empty">
                                 Belum ada character yang ditambahkan ke progression.
                             </td>
                         </tr>

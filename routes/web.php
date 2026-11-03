@@ -32,6 +32,12 @@ Route::middleware(['auth', 'role:admin'])
             ->name('progression.create');
         Route::post('/progression', [GbfProgressionController::class, 'store'])
             ->name('progression.store');
+        Route::get('/progression/{character}', [GbfProgressionController::class, 'show'])
+            ->name('progression.show');
+        Route::get('/progression/{character}/edit', [GbfProgressionController::class, 'edit'])
+            ->name('progression.edit');
+        Route::put('/progression/{character}', [GbfProgressionController::class, 'update'])
+            ->name('progression.update');
     });
 
 Route::get('/dashboard', function () {

@@ -105,7 +105,7 @@
                 </nav>
 
                 <div class="admin-sidebar-footer">
-                    <a href="{{ route('dashboard') }}" class="admin-back-link">
+                    <a href="{{ route('admin.dashboard') }}" class="admin-back-link">
                         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                             <path d="M14.25 5.25 7.5 12l6.75 6.75M8.25 12h12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>

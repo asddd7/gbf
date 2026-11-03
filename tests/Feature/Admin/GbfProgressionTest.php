@@ -76,6 +76,150 @@ test('admin can open create page and select existing characters stages and items
         ->assertSee($material->name);
 });
 
+test('progression show displays configured stages and item quantities', function () {
+    $admin = progressionAdmin();
+    $character = progressionCharacter();
+    $stage = $character->stages()->create([
+        'stage_key' => 'transcendance-1',
+        'name' => 'Transcendance 1',
+        'sort_order' => 1,
+    ]);
+    $material = progressionMaterial('Silver Centrum');
+    $stage->materials()->create([
+        'material_id' => $material->id,
+        'quantity' => 12,
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.progression.show', $character))
+        ->assertOk()
+        ->assertSee($character->name)
+        ->assertSee($stage->name)
+        ->assertSee($material->name)
+        ->assertSee('12')
+        ->assertSee($material->unit);
+});
+
+test('progression edit page is prefilled with its current stages and items', function () {
+    $admin = progressionAdmin();
+    $character = progressionCharacter();
+    $stage = $character->stages()->create([
+        'stage_key' => 'transcendance-1',
+        'name' => 'Transcendance 1',
+        'sort_order' => 1,
+    ]);
+    $material = progressionMaterial('Silver Centrum');
+    $stage->materials()->create([
+        'material_id' => $material->id,
+        'quantity' => 12,
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.progression.edit', $character))
+        ->assertOk()
+        ->assertSee($character->name)
+        ->assertSee($stage->name)
+        ->assertSee($material->name)
+        ->assertSee('value="12"', false);
+});
+
+test('admin can edit progression and detach omitted stages', function () {
+    $admin = progressionAdmin();
+    $character = progressionCharacter();
+    $keptStage = $character->stages()->create([
+        'stage_key' => 'stage-one',
+        'name' => 'Stage One',
+        'sort_order' => 1,
+    ]);
+    $removedStage = $character->stages()->create([
+        'stage_key' => 'stage-two',
+        'name' => 'Stage Two',
+        'sort_order' => 2,
+    ]);
+    $newStage = progressionStage('Stage Three', 3);
+    $keptMaterial = progressionMaterial('Kept Material');
+    $removedMaterial = progressionMaterial('Removed Material');
+    $keptStage->materials()->create([
+        'material_id' => $keptMaterial->id,
+        'quantity' => 2,
+    ]);
+    $keptStage->materials()->create([
+        'material_id' => $removedMaterial->id,
+        'quantity' => 3,
+    ]);
+
+    $response = $this->actingAs($admin)->put(
+        route('admin.progression.update', $character),
+        [
+            'stages' => [
+                [
+                    'stage_id' => $keptStage->id,
+                    'materials' => [
+                        ['material_id' => $keptMaterial->id, 'quantity' => 9],
+                    ],
+                ],
+                [
+                    'stage_id' => $newStage->id,
+                    'materials' => [
+                        ['material_id' => $removedMaterial->id, 'quantity' => 5],
+                    ],
+                ],
+            ],
+        ]
+    );
+
+    $response
+        ->assertRedirect(route('admin.progression.show', $character))
+        ->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('gbf_character_stages', [
+        'id' => $keptStage->id,
+        'character_id' => $character->id,
+    ]);
+    $this->assertDatabaseHas('gbf_character_stages', [
+        'id' => $newStage->id,
+        'character_id' => $character->id,
+    ]);
+    $this->assertDatabaseHas('gbf_character_stages', [
+        'id' => $removedStage->id,
+        'character_id' => null,
+    ]);
+    $this->assertDatabaseHas('gbf_character_stage_materials', [
+        'character_stage_id' => $keptStage->id,
+        'material_id' => $keptMaterial->id,
+        'quantity' => 9,
+    ]);
+    $this->assertDatabaseMissing('gbf_character_stage_materials', [
+        'character_stage_id' => $keptStage->id,
+        'material_id' => $removedMaterial->id,
+    ]);
+    $this->assertDatabaseHas('gbf_character_stage_materials', [
+        'character_stage_id' => $newStage->id,
+        'material_id' => $removedMaterial->id,
+        'quantity' => 5,
+    ]);
+});
+
+test('admin can remove all progression stages from a character', function () {
+    $admin = progressionAdmin();
+    $character = progressionCharacter();
+    $stage = $character->stages()->create([
+        'stage_key' => 'stage-one',
+        'name' => 'Stage One',
+        'sort_order' => 1,
+    ]);
+
+    $this->actingAs($admin)
+        ->put(route('admin.progression.update', $character), [])
+        ->assertRedirect(route('admin.progression.index'))
+        ->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('gbf_character_stages', [
+        'id' => $stage->id,
+        'character_id' => null,
+    ]);
+});
+
 test('admin can assign multiple existing stages and item quantities to a character', function () {
     $admin = progressionAdmin();
     $character = progressionCharacter();
