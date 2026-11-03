@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\GbfCharacterController;
+use App\Http\Controllers\Admin\GbfCharacterStageController;
 use App\Http\Controllers\Admin\GbfMaterialController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +17,9 @@ Route::middleware(['auth', 'role:admin'])
         })->name('dashboard');
 
         Route::resource('characters', GbfCharacterController::class)
+            ->except(['show']);
+
+        Route::resource('stages', GbfCharacterStageController::class)
             ->except(['show']);
 
         Route::resource('materials', GbfMaterialController::class)

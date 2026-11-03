@@ -36,6 +36,12 @@
             >
                 Kelola Materials →
             </a>
+            <a
+                href="{{ route('admin.stages.index') }}"
+                class="admin-button admin-button-secondary"
+            >
+                Kelola Tahap →
+            </a>
         </div>
     </div>
 </div>

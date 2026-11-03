@@ -59,6 +59,21 @@
                     </a>
 
                     <a
+                        href="{{ route('admin.stages.index') }}"
+                        @class([
+                            'admin-nav-link',
+                            'is-active' => request()->routeIs('admin.stages.*'),
+                        ])
+                        @if (request()->routeIs('admin.stages.*')) aria-current="page" @endif
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M5.25 5.25h13.5v4.5H5.25v-4.5ZM5.25 14.25h13.5v4.5H5.25v-4.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                            <path d="M8.25 7.5h.008M8.25 16.5h.008" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                        </svg>
+                        <span>Tahap</span>
+                    </a>
+
+                    <a
                         href="{{ route('admin.materials.index') }}"
                         @class([
                             'admin-nav-link',

@@ -215,6 +215,36 @@
     min-width: 800px;
 }
 
+.stage-table {
+    min-width: 850px;
+}
+
+.stage-character-name {
+    font-weight: 650;
+}
+
+.stage-description {
+    display: block;
+    max-width: 300px;
+    margin-top: 3px;
+    color: var(--admin-muted);
+    font-size: 11px;
+}
+
+.stage-key {
+    padding: 3px 6px;
+    border: 1px solid var(--admin-border);
+    border-radius: 5px;
+    background: var(--admin-background);
+    color: var(--admin-muted);
+    font-size: 11px;
+}
+
+.form-help {
+    color: var(--admin-muted);
+    font-size: 11px;
+}
+
 .material-cell {
     display: flex;
     min-width: 190px;
