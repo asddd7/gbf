@@ -11,6 +11,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class GbfMaterialController extends Controller
 {
@@ -35,15 +39,29 @@ class GbfMaterialController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $this->validateMaterial($request);
+
         $stageIds = $validated['stage_ids'] ?? [];
-        unset($validated['stage_ids'], $validated['quantities'], $validated['notes']);
+
+        unset(
+            $validated['stage_ids'],
+            $validated['quantities'],
+            $validated['notes']
+        );
 
         $validated['slug'] = $this->makeUniqueSlug(
             $validated['slug'] ?? $validated['name']
         );
 
+        if ($request->hasFile('image')) {
+            $validated['image_path'] = $this->uploadMaterialImage(
+                $request->file('image'),
+                $validated['slug']
+            );
+        }
+
         DB::transaction(function () use ($validated, $request, $stageIds): void {
             $material = GbfMaterial::create($validated);
+
             $this->syncStageMaterials($material, $stageIds, $request);
         });
 
@@ -63,16 +81,30 @@ class GbfMaterialController extends Controller
     public function update(Request $request, GbfMaterial $material): RedirectResponse
     {
         $validated = $this->validateMaterial($request, $material);
+
         $stageIds = $validated['stage_ids'] ?? [];
-        unset($validated['stage_ids'], $validated['quantities'], $validated['notes']);
+
+        unset(
+            $validated['stage_ids'],
+            $validated['quantities'],
+            $validated['notes']
+        );
 
         $validated['slug'] = $this->makeUniqueSlug(
             $validated['slug'] ?? $validated['name'],
             $material->id
         );
 
+        if ($request->hasFile('image')) {
+            $validated['image_path'] = $this->uploadMaterialImage(
+                $request->file('image'),
+                $validated['slug']
+            );
+        }
+
         DB::transaction(function () use ($validated, $material, $request, $stageIds): void {
             $material->update($validated);
+
             $this->syncStageMaterials($material, $stageIds, $request);
         });
 
@@ -113,7 +145,12 @@ class GbfMaterialController extends Controller
             ],
             'category' => ['nullable', 'string', 'max:50'],
             'unit' => ['required', 'string', 'max:30'],
-            'image_path' => ['nullable', 'string', 'max:255'],
+            'image' => [
+                'nullable',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:5120',
+            ],
             'stage_ids' => ['nullable', 'array'],
             'stage_ids.*' => [
                 'required',
@@ -171,5 +208,78 @@ class GbfMaterialController extends Controller
         }
 
         return $slug;
+    }
+
+    private function uploadMaterialImage(
+        UploadedFile $file,
+        string $slug
+    ): string {
+        $cloudName = config('services.cloudinary.cloud_name');
+        $apiKey = config('services.cloudinary.api_key');
+        $apiSecret = config('services.cloudinary.api_secret');
+
+        if (!$cloudName || !$apiKey || !$apiSecret) {
+            throw ValidationException::withMessages([
+                'image' => 'Konfigurasi Cloudinary belum lengkap.',
+            ]);
+        }
+
+        $timestamp = time();
+
+        $publicId = 'gbf/materials/' . $slug . '-' . Str::uuid();
+
+        $transformation = 'c_fill,g_auto,h_600,w_600';
+
+        $signatureString =
+            'public_id=' . $publicId .
+            '&timestamp=' . $timestamp .
+            '&transformation=' . $transformation .
+            $apiSecret;
+
+        $signature = sha1($signatureString);
+
+        try {
+            $response = Http::timeout(30)
+                ->attach(
+                    'file',
+                    file_get_contents($file->getRealPath()),
+                    $file->getClientOriginalName()
+                )
+                ->post(
+                    "https://api.cloudinary.com/v1_1/{$cloudName}/image/upload",
+                    [
+                        'api_key' => $apiKey,
+                        'timestamp' => $timestamp,
+                        'public_id' => $publicId,
+                        'transformation' => $transformation,
+                        'signature' => $signature,
+                    ]
+                );
+
+            if (!$response->successful() || !$response->json('secure_url')) {
+                Log::error('Cloudinary material upload failed', [
+                    'status' => $response->status(),
+                    'response' => $response->json(),
+                ]);
+
+                throw ValidationException::withMessages([
+                    'image' => 'Gagal mengunggah gambar material ke Cloudinary.',
+                ]);
+            }
+
+            return $response->json('secure_url');
+
+        } catch (ValidationException $exception) {
+            throw $exception;
+
+        } catch (\Throwable $exception) {
+            Log::error('Cloudinary material connection error', [
+                'message' => $exception->getMessage(),
+            ]);
+
+            throw ValidationException::withMessages([
+                'image' => 'Tidak dapat menghubungi Cloudinary. Silakan coba lagi.',
+            ]);
+        }
     }
 }
