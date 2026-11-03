@@ -28,8 +28,10 @@ Route::middleware(['auth', 'role:admin'])
 
         Route::get('/progression', [GbfProgressionController::class, 'index'])
             ->name('progression.index');
-        Route::put('/progression', [GbfProgressionController::class, 'update'])
-            ->name('progression.update');
+        Route::get('/progression/create', [GbfProgressionController::class, 'create'])
+            ->name('progression.create');
+        Route::post('/progression', [GbfProgressionController::class, 'store'])
+            ->name('progression.store');
     });
 
 Route::get('/dashboard', function () {

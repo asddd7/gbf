@@ -9,61 +9,57 @@ use App\Models\GbfMaterial;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class GbfProgressionController extends Controller
 {
-    public function index(Request $request): View
+    public function index(): View
     {
-        $validated = $request->validate([
-            'character_id' => ['nullable', 'integer', 'exists:gbf_characters,id'],
-        ]);
+        $characters = GbfCharacter::query()
+            ->whereHas('stages')
+            ->orderBy('name')
+            ->get(['id', 'name']);
 
+        return view('admin.progression.index', compact('characters'));
+    }
+
+    public function create(): View
+    {
         $characters = GbfCharacter::query()
             ->orderBy('name')
-            ->get(['id', 'name', 'character_type', 'element']);
-
-        $character = isset($validated['character_id'])
-            ? GbfCharacter::query()
-                ->with(['stages.materials.material'])
-                ->findOrFail($validated['character_id'])
-            : null;
-
+            ->get(['id', 'name']);
+        $stages = GbfCharacterStage::query()
+            ->with('character:id,name')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get(['id', 'character_id', 'name', 'sort_order']);
         $materials = GbfMaterial::query()
             ->orderBy('name')
-            ->get(['id', 'name', 'unit', 'category']);
+            ->get(['id', 'name', 'unit']);
 
-        return view('admin.progression.index', compact(
+        return view('admin.progression.create', compact(
             'characters',
-            'character',
+            'stages',
             'materials'
         ));
     }
 
-    public function update(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'character_id' => ['required', 'integer', 'exists:gbf_characters,id'],
-            'stages' => ['nullable', 'array'],
-            'stages.*.id' => [
-                'nullable',
-                'integer',
-                'distinct',
-                Rule::exists('gbf_character_stages', 'id')
-                    ->where('character_id', $request->input('character_id')),
-            ],
-            'stages.*.name' => ['required', 'string', 'max:255'],
-            'stages.*.sort_order' => [
+            'stages' => ['required', 'array', 'min:1'],
+            'stages.*.stage_id' => [
                 'required',
                 'integer',
-                'min:0',
-                'max:65535',
+                'distinct',
+                'exists:gbf_character_stages,id',
             ],
             'stages.*.materials' => [
-                'nullable',
+                'required',
                 'array',
+                'min:1',
                 function (string $attribute, mixed $value, \Closure $fail): void {
                     if (! is_array($value)) {
                         return;
@@ -76,7 +72,7 @@ class GbfProgressionController extends Controller
                         ->all();
 
                     if (count($materialIds) !== count(array_unique($materialIds))) {
-                        $fail('Material tidak boleh dipilih lebih dari sekali dalam satu tahap.');
+                        $fail('Item tidak boleh dipilih lebih dari sekali dalam satu tahap.');
                     }
                 },
             ],
@@ -93,97 +89,49 @@ class GbfProgressionController extends Controller
             ],
         ]);
 
-        $character = GbfCharacter::findOrFail($validated['character_id']);
-        $stages = $validated['stages'] ?? [];
-
-        DB::transaction(function () use ($character, $stages): void {
-            $stageIds = collect($stages)
-                ->pluck('id')
-                ->filter()
+        DB::transaction(function () use ($validated): void {
+            $characterId = (int) $validated['character_id'];
+            $stageRows = $validated['stages'];
+            $stageIds = collect($stageRows)
+                ->pluck('stage_id')
                 ->map(fn ($id) => (int) $id)
                 ->all();
+            $stages = GbfCharacterStage::query()
+                ->whereIn('id', $stageIds)
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
 
-            if ($stageIds === []) {
-                $character->stages()->delete();
-            } else {
-                $character->stages()->whereNotIn('id', $stageIds)->delete();
+            if ($stages->count() !== count($stageIds)) {
+                throw ValidationException::withMessages([
+                    'stages' => 'Salah satu tahap tidak lagi tersedia. Silakan muat ulang halaman.',
+                ]);
             }
 
-            foreach ($stages as $stageData) {
-                $materialRows = $stageData['materials'] ?? [];
-                unset($stageData['materials']);
+            foreach ($stageRows as $index => $stageRow) {
+                $stage = $stages->get((int) $stageRow['stage_id']);
 
-                $stageId = $stageData['id'] ?? null;
-                unset($stageData['id']);
-
-                if ($stageId) {
-                    $stage = $character->stages()
-                        ->whereKey($stageId)
-                        ->firstOrFail();
-                    $stage->update($stageData);
-                } else {
-                    $stage = $character->stages()->create([
-                        ...$stageData,
-                        'stage_key' => $this->makeUniqueStageKey(
-                            $character,
-                            $stageData['name']
-                        ),
+                if ($stage->character_id !== null && (int) $stage->character_id !== $characterId) {
+                    throw ValidationException::withMessages([
+                        "stages.{$index}.stage_id" => 'Tahap ini sudah digunakan oleh karakter lain.',
                     ]);
                 }
 
-                $this->syncMaterials($stage, $materialRows);
+                if ($stage->character_id === null) {
+                    $stage->update(['character_id' => $characterId]);
+                }
+
+                foreach ($stageRow['materials'] as $materialRow) {
+                    $stage->materials()->updateOrCreate(
+                        ['material_id' => $materialRow['material_id']],
+                        ['quantity' => $materialRow['quantity']]
+                    );
+                }
             }
         });
 
         return redirect()
-            ->route('admin.progression.index', [
-                'character_id' => $character->id,
-            ])
-            ->with('success', 'Tahap dan kebutuhan material berhasil disimpan.');
-    }
-
-    private function syncMaterials(GbfCharacterStage $stage, array $materialRows): void
-    {
-        $materialIds = collect($materialRows)
-            ->pluck('material_id')
-            ->map(fn ($id) => (int) $id)
-            ->all();
-
-        if ($materialIds === []) {
-            $stage->materials()->delete();
-
-            return;
-        }
-
-        $stage->materials()
-            ->whereNotIn('material_id', $materialIds)
-            ->delete();
-
-        foreach ($materialRows as $row) {
-            $stage->materials()->updateOrCreate(
-                ['material_id' => $row['material_id']],
-                ['quantity' => $row['quantity']]
-            );
-        }
-    }
-
-    private function makeUniqueStageKey(GbfCharacter $character, string $name): string
-    {
-        $baseKey = Str::limit(Str::slug($name) ?: 'stage', 80, '');
-        $stageKey = $baseKey;
-        $counter = 1;
-
-        while (
-            GbfCharacterStage::query()
-                ->where('character_id', $character->id)
-                ->where('stage_key', $stageKey)
-                ->exists()
-        ) {
-            $suffix = '-'.$counter;
-            $stageKey = Str::limit($baseKey, 80 - strlen($suffix), '').$suffix;
-            $counter++;
-        }
-
-        return $stageKey;
+            ->route('admin.progression.index')
+            ->with('success', 'Pengaturan progression karakter berhasil disimpan.');
     }
 }
