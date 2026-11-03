@@ -245,110 +245,93 @@
     font-size: 11px;
 }
 
-.progression-character-panel {
-    margin-bottom: 22px;
+.progression-create-panel {
+    padding: 24px;
 }
 
-.progression-character-form {
-    display: flex;
-    align-items: flex-end;
-    gap: 12px;
-    padding: 18px 22px;
-}
-
-.progression-character-form .admin-form-group {
-    width: min(100%, 440px);
-}
-
-.progression-empty {
-    padding: 30px 20px;
-    border: 1px dashed var(--admin-border);
-    border-radius: 12px;
-    color: var(--admin-muted);
-    text-align: center;
-}
-
-.progression-material-warning a {
-    color: inherit;
-    font-weight: 700;
-    text-decoration: underline;
-}
-
-.progression-editor {
+.progression-create-panel form {
     display: grid;
-    gap: 16px;
+    gap: 24px;
+}
+
+.progression-create-character {
+    width: min(100%, 520px);
 }
 
 .progression-editor-heading {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 4px 0;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--admin-border);
 }
 
 .progression-editor-heading h2 {
-    margin: 5px 0 3px;
-    font-size: 20px;
+    margin: 5px 0 4px;
+    font-size: 18px;
     font-weight: 750;
 }
 
 .progression-editor-heading p {
     margin: 0;
     color: var(--admin-muted);
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .progression-stage-list {
     display: grid;
-    gap: 16px;
+    gap: 14px;
 }
 
 .progression-stage-card {
     min-width: 0;
     overflow: hidden;
     border: 1px solid var(--admin-border);
-    border-radius: 12px;
+    border-radius: 11px;
     background: var(--admin-surface);
-    box-shadow: 0 3px 12px rgb(15 23 42 / 3%);
+    box-shadow: 0 2px 8px rgb(15 23 42 / 3%);
 }
 
 .progression-stage-heading {
     display: grid;
     grid-template-columns: 34px minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 14px;
-    padding: 16px 18px;
+    align-items: end;
+    gap: 12px;
+    padding: 16px;
 }
 
 .progression-stage-number {
     display: grid;
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     place-items: center;
-    border-radius: 10px;
+    border-radius: 9px;
     color: var(--admin-primary);
     background: var(--primary-light);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 750;
 }
 
 .progression-stage-fields {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 120px;
-    align-items: end;
-    gap: 12px;
+    min-width: 0;
+    grid-template-columns: minmax(0, 1fr);
 }
 
 .progression-stage-fields .admin-form-group,
 .progression-material-row .admin-form-group {
-    gap: 5px;
+    gap: 6px;
+}
+
+.progression-stage-select {
+    max-width: 620px;
 }
 
 .progression-materials {
     display: grid;
-    gap: 12px;
-    padding: 16px 18px 18px;
+    gap: 14px;
+    padding: 16px;
     border-top: 1px solid var(--admin-border);
     background: var(--admin-background);
 }
@@ -361,47 +344,46 @@
 }
 
 .progression-materials-heading h3 {
-    margin: 0 0 3px;
-    font-size: 13px;
+    margin: 0 0 4px;
+    font-size: 14px;
     font-weight: 700;
 }
 
 .progression-materials-heading p {
     margin: 0;
     color: var(--admin-muted);
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .progression-material-list {
     display: grid;
-    gap: 8px;
+    gap: 10px;
 }
 
 .progression-material-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 120px auto;
+    grid-template-columns: minmax(0, 1fr) minmax(110px, 150px) auto;
     align-items: end;
-    gap: 10px;
-    padding: 10px;
+    gap: 12px;
+    padding: 12px;
     border: 1px solid var(--admin-border);
-    border-radius: 9px;
+    border-radius: 10px;
     background: var(--admin-surface);
 }
 
 .progression-material-row select,
 .progression-material-row input {
-    min-height: 36px;
-    padding: 7px 10px;
+    min-height: 40px;
 }
 
 .progression-material-row > .admin-button {
-    min-height: 36px;
+    min-height: 40px;
 }
 
 .progression-empty-stages {
-    padding: 24px;
+    padding: 20px;
     border: 1px dashed var(--admin-border);
-    border-radius: 10px;
+    border-radius: 9px;
     color: var(--admin-muted);
     font-size: 13px;
     text-align: center;
@@ -409,60 +391,7 @@
 
 .progression-footer {
     margin-top: 0;
-}
-
-.unassigned-stage-picker {
-    display: grid;
-    gap: 9px;
-    padding: 14px;
-    border: 1px solid var(--admin-border);
-    border-radius: 10px;
-    background: var(--admin-background);
-}
-
-.unassigned-stage-picker h3 {
-    margin: 0;
-    font-size: 13px;
-}
-
-.unassigned-stage-picker > p {
-    margin: -5px 0 2px;
-    color: var(--admin-muted);
-    font-size: 12px;
-}
-
-.unassigned-stage-option {
-    display: flex;
-    align-items: flex-start;
-    gap: 9px;
-    padding: 9px 10px;
-    border: 1px solid var(--admin-border);
-    border-radius: 8px;
-    background: var(--admin-surface);
-    cursor: pointer;
-}
-
-.unassigned-stage-option input {
-    width: 16px;
-    height: 16px;
-    flex: 0 0 16px;
-    margin: 2px 0 0;
-    accent-color: var(--admin-primary);
-}
-
-.unassigned-stage-option strong,
-.unassigned-stage-option small {
-    display: block;
-}
-
-.unassigned-stage-option strong {
-    color: var(--admin-text);
-    font-size: 12px;
-}
-
-.unassigned-stage-option small {
-    color: var(--admin-muted);
-    font-size: 11px;
+    padding-top: 18px;
 }
 
 .material-cell {
@@ -1082,14 +1011,8 @@
         width: 100%;
     }
 
-    .progression-character-form {
-        align-items: stretch;
-        flex-direction: column;
+    .progression-create-panel {
         padding: 16px;
-    }
-
-    .progression-character-form .admin-form-group {
-        width: 100%;
     }
 
     .progression-editor-heading {
@@ -1110,13 +1033,12 @@
 
     .progression-stage-fields {
         grid-column: 2;
-        grid-template-columns: minmax(0, 1fr) 88px;
-        gap: 8px;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .progression-stage-heading > .progression-remove-stage {
         grid-column: 2;
-        justify-self: start;
+        justify-self: stretch;
     }
 
     .progression-materials {
@@ -1129,13 +1051,18 @@
     }
 
     .progression-material-row {
-        grid-template-columns: minmax(0, 1fr) 86px;
-        gap: 8px;
+        grid-template-columns: minmax(0, 1fr) 100px;
+        gap: 10px;
     }
 
     .progression-material-row > .progression-remove-material {
         grid-column: 1 / -1;
-        justify-self: start;
+        justify-self: stretch;
+    }
+
+    .progression-create-panel .admin-form-footer {
+        margin-top: 0;
+        padding-top: 16px;
     }
 }
 
