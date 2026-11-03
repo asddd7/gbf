@@ -17,7 +17,8 @@
     </div>
 
     <div class="admin-panel admin-form-panel">
-        <form method="POST" action="{{ route('admin.materials.store') }}">
+        <form method="POST" action="{{ route('admin.materials.store') }}"
+        enctype="multipart/form-data">
             @csrf
             @include('admin.materials._form')
         </form>

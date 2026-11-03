@@ -17,7 +17,8 @@
     </div>
 
     <div class="admin-panel admin-form-panel">
-        <form method="POST" action="{{ route('admin.materials.update', $material) }}">
+        <form method="POST" action="{{ route('admin.materials.update', $material) }}"
+        enctype="multipart/form-data">
             @csrf
             @method('PUT')
             @include('admin.materials._form')
