@@ -31,14 +31,17 @@ class GbfCharacterController extends Controller
 
     public function create(): View
     {
-        return view('admin.characters.create');
+        $unassignedStages = $this->unassignedStages();
+
+        return view('admin.characters.create', compact('unassignedStages'));
     }
 
     public function store(Request $request): RedirectResponse
     {
         $validated = $this->validateCharacter($request);
         $stages = $validated['stages'] ?? [];
-        unset($validated['stages']);
+        $unassignedStageIds = $validated['unassigned_stage_ids'] ?? [];
+        unset($validated['stages'], $validated['unassigned_stage_ids']);
 
         $validated['slug'] = $this->makeUniqueSlug(
             $validated['slug'] ?? $validated['name']
@@ -51,9 +54,9 @@ class GbfCharacterController extends Controller
             );
         }
 
-        DB::transaction(function () use ($validated, $stages): void {
+        DB::transaction(function () use ($validated, $stages, $unassignedStageIds): void {
             $character = GbfCharacter::create($validated);
-            $this->syncStages($character, $stages);
+            $this->syncStages($character, $stages, $unassignedStageIds);
         });
 
         return redirect()
@@ -64,8 +67,9 @@ class GbfCharacterController extends Controller
     public function edit(GbfCharacter $character): View
     {
         $character->load('stages');
+        $unassignedStages = $this->unassignedStages();
 
-        return view('admin.characters.edit', compact('character'));
+        return view('admin.characters.edit', compact('character', 'unassignedStages'));
     }
 
     public function update(
@@ -74,7 +78,8 @@ class GbfCharacterController extends Controller
     ): RedirectResponse {
         $validated = $this->validateCharacter($request, $character);
         $stages = $validated['stages'] ?? [];
-        unset($validated['stages']);
+        $unassignedStageIds = $validated['unassigned_stage_ids'] ?? [];
+        unset($validated['stages'], $validated['unassigned_stage_ids']);
 
         $validated['slug'] = $this->makeUniqueSlug(
             $validated['slug'] ?? $validated['name'],
@@ -88,9 +93,14 @@ class GbfCharacterController extends Controller
             );
         }
 
-        DB::transaction(function () use ($validated, $character, $stages): void {
+        DB::transaction(function () use (
+            $validated,
+            $character,
+            $stages,
+            $unassignedStageIds
+        ): void {
             $character->update($validated);
-            $this->syncStages($character, $stages);
+            $this->syncStages($character, $stages, $unassignedStageIds);
         });
 
         return redirect()
@@ -183,16 +193,63 @@ class GbfCharacterController extends Controller
                 'min:0',
                 'max:65535',
             ],
+            'unassigned_stage_ids' => ['nullable', 'array'],
+            'unassigned_stage_ids.*' => [
+                'required',
+                'integer',
+                'distinct',
+                Rule::exists('gbf_character_stages', 'id')
+                    ->whereNull('character_id'),
+            ],
         ]);
     }
 
-    private function syncStages(GbfCharacter $character, array $stages): void
+    private function unassignedStages()
     {
+        return GbfCharacterStage::query()
+            ->whereNull('character_id')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+    }
+
+    private function syncStages(
+        GbfCharacter $character,
+        array $stages,
+        array $unassignedStageIds = []
+    ): void {
         $stageIds = collect($stages)
             ->pluck('id')
             ->filter()
             ->map(fn ($id) => (int) $id)
             ->all();
+
+        $unassignedStages = GbfCharacterStage::query()
+            ->whereNull('character_id')
+            ->whereIn('id', $unassignedStageIds)
+            ->get();
+
+        $submittedStageKeys = collect($stages)
+            ->pluck('stage_key')
+            ->merge($unassignedStages->pluck('stage_key'));
+
+        if ($submittedStageKeys->duplicates()->isNotEmpty()) {
+            throw ValidationException::withMessages([
+                'unassigned_stage_ids' => 'Stage key tahap yang dipilih harus unik untuk character ini.',
+            ]);
+        }
+
+        $conflictingStageKey = GbfCharacterStage::query()
+            ->where('character_id', $character->id)
+            ->whereNotIn('id', $stageIds)
+            ->whereIn('stage_key', $unassignedStages->pluck('stage_key'))
+            ->exists();
+
+        if ($conflictingStageKey) {
+            throw ValidationException::withMessages([
+                'unassigned_stage_ids' => 'Stage key tahap yang dipilih sudah digunakan oleh character ini.',
+            ]);
+        }
 
         if ($stageIds === []) {
             $character->stages()->delete();
@@ -214,6 +271,13 @@ class GbfCharacterController extends Controller
             }
 
             $character->stages()->create($stage);
+        }
+
+        if ($unassignedStageIds !== []) {
+            GbfCharacterStage::query()
+                ->whereNull('character_id')
+                ->whereIn('id', $unassignedStageIds)
+                ->update(['character_id' => $character->id]);
         }
     }
 

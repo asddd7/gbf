@@ -150,6 +150,33 @@
             </button>
         </div>
 
+        @if ($unassignedStages->isNotEmpty())
+            <div class="unassigned-stage-picker">
+                <h3>Hubungkan Tahap yang Belum Terhubung</h3>
+                <p>Pilih tahap yang dibuat dari halaman Tahap untuk menghubungkannya ke character ini.</p>
+                @foreach ($unassignedStages as $unassignedStage)
+                    <label class="unassigned-stage-option">
+                        <input
+                            type="checkbox"
+                            name="unassigned_stage_ids[]"
+                            value="{{ $unassignedStage->id }}"
+                            @checked(in_array(
+                                (string) $unassignedStage->id,
+                                array_map('strval', old('unassigned_stage_ids', [])),
+                                true
+                            ))
+                        >
+                        <span>
+                            <strong>{{ $unassignedStage->name }}</strong>
+                            <small>Urutan {{ $unassignedStage->sort_order }}</small>
+                        </span>
+                    </label>
+                @endforeach
+                @error('unassigned_stage_ids') <small class="field-error">{{ $message }}</small> @enderror
+                @error('unassigned_stage_ids.*') <small class="field-error">{{ $message }}</small> @enderror
+            </div>
+        @endif
+
         @if ($errors->has('stages') || $errors->has('stages.*.id') || $errors->has('stages.*.stage_key') || $errors->has('stages.*.name') || $errors->has('stages.*.sort_order'))
             <div class="admin-alert admin-alert-danger">
                 Periksa kembali nama, key, dan urutan tahap. Stage key harus unik untuk setiap character.

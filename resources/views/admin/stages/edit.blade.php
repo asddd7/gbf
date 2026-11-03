@@ -12,7 +12,7 @@
         <div>
             <span class="admin-eyebrow">STAGE MANAGEMENT</span>
             <h1>Edit Tahap</h1>
-            <p>Perbarui tahap {{ $stage->name }} untuk {{ $stage->character?->name }}.</p>
+            <p>Perbarui nama dan urutan tahap {{ $stage->name }}.</p>
         </div>
     </div>
 

@@ -12,7 +12,7 @@
         <div>
             <span class="admin-eyebrow">DATA MANAGEMENT</span>
             <h1>Tahap Character</h1>
-            <p>Kelola tahap perkembangan karakter dan material yang dibutuhkan.</p>
+            <p>Kelola nama tahap dan urutan tampilnya.</p>
         </div>
 
         <a href="{{ route('admin.stages.create') }}" class="admin-button admin-button-primary">
@@ -42,11 +42,8 @@
             <table class="admin-table stage-table">
                 <thead>
                     <tr>
-                        <th>Character</th>
-                        <th>Tahap</th>
-                        <th>Stage Key</th>
+                        <th>Nama Tahap</th>
                         <th>Urutan</th>
-                        <th>Material</th>
                         <th class="text-right">Aksi</th>
                     </tr>
                 </thead>
@@ -54,25 +51,9 @@
                     @forelse ($stages as $stage)
                         <tr>
                             <td>
-                                <span class="stage-character-name">
-                                    {{ $stage->character?->name ?? 'Character tidak ditemukan' }}
-                                </span>
-                            </td>
-                            <td>
                                 <strong>{{ $stage->name }}</strong>
-                                @if ($stage->description)
-                                    <small class="stage-description">
-                                        {{ \Illuminate\Support\Str::limit($stage->description, 90) }}
-                                    </small>
-                                @endif
                             </td>
-                            <td><code class="stage-key">{{ $stage->stage_key }}</code></td>
                             <td>{{ $stage->sort_order }}</td>
-                            <td>
-                                <span class="admin-tag tag-material">
-                                    {{ $stage->materials_count }} material
-                                </span>
-                            </td>
                             <td>
                                 <div class="admin-actions">
                                     <a
@@ -84,7 +65,7 @@
                                     <form
                                         method="POST"
                                         action="{{ route('admin.stages.destroy', $stage) }}"
-                                        onsubmit="return confirm('Hapus tahap ini? Semua kebutuhan material yang terhubung ke tahap ini juga akan dihapus.')"
+                                        onsubmit="return confirm('Hapus tahap ini? Relasi material yang terhubung ke tahap ini juga akan dihapus.')"
                                     >
                                         @csrf
                                         @method('DELETE')
@@ -97,8 +78,8 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="admin-empty">
-                                Belum ada tahap karakter. Tambahkan character terlebih dahulu, lalu buat tahapnya.
+                            <td colspan="3" class="admin-empty">
+                                Belum ada tahap. Silakan tambahkan tahap pertama.
                             </td>
                         </tr>
                     @endforelse
