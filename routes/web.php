@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\GbfCharacterController;
 use App\Http\Controllers\Admin\GbfCharacterStageController;
 use App\Http\Controllers\Admin\GbfMaterialController;
+use App\Http\Controllers\Admin\GbfProgressionController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
@@ -24,6 +25,11 @@ Route::middleware(['auth', 'role:admin'])
 
         Route::resource('materials', GbfMaterialController::class)
             ->except(['show']);
+
+        Route::get('/progression', [GbfProgressionController::class, 'index'])
+            ->name('progression.index');
+        Route::put('/progression', [GbfProgressionController::class, 'update'])
+            ->name('progression.update');
     });
 
 Route::get('/dashboard', function () {

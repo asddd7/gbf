@@ -42,6 +42,12 @@
             >
                 Kelola Tahap →
             </a>
+            <a
+                href="{{ route('admin.progression.index') }}"
+                class="admin-button admin-button-secondary"
+            >
+                Atur Progression →
+            </a>
         </div>
     </div>
 </div>

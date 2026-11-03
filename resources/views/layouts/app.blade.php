@@ -74,6 +74,21 @@
                     </a>
 
                     <a
+                        href="{{ route('admin.progression.index') }}"
+                        @class([
+                            'admin-nav-link',
+                            'is-active' => request()->routeIs('admin.progression.*'),
+                        ])
+                        @if (request()->routeIs('admin.progression.*')) aria-current="page" @endif
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M5.25 5.25h13.5v13.5H5.25V5.25Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+                            <path d="M8.25 9h7.5M8.25 12h4.5M8.25 15h7.5M15.75 11.25l1.5 1.5 2.25-2.25" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span>Progression</span>
+                    </a>
+
+                    <a
                         href="{{ route('admin.materials.index') }}"
                         @class([
                             'admin-nav-link',
