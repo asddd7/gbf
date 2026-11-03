@@ -39,9 +39,6 @@ class GbfCharacterController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $this->validateCharacter($request);
-        $stages = $validated['stages'] ?? [];
-        $unassignedStageIds = $validated['unassigned_stage_ids'] ?? [];
-        unset($validated['stages'], $validated['unassigned_stage_ids']);
 
         $validated['slug'] = $this->makeUniqueSlug(
             $validated['slug'] ?? $validated['name']
@@ -54,10 +51,7 @@ class GbfCharacterController extends Controller
             );
         }
 
-        DB::transaction(function () use ($validated, $stages, $unassignedStageIds): void {
-            $character = GbfCharacter::create($validated);
-            $this->syncStages($character, $stages, $unassignedStageIds);
-        });
+        GbfCharacter::create($validated);
 
         return redirect()
             ->route('admin.characters.index')
@@ -77,9 +71,6 @@ class GbfCharacterController extends Controller
         GbfCharacter $character
     ): RedirectResponse {
         $validated = $this->validateCharacter($request, $character);
-        $stages = $validated['stages'] ?? [];
-        $unassignedStageIds = $validated['unassigned_stage_ids'] ?? [];
-        unset($validated['stages'], $validated['unassigned_stage_ids']);
 
         $validated['slug'] = $this->makeUniqueSlug(
             $validated['slug'] ?? $validated['name'],
@@ -93,15 +84,7 @@ class GbfCharacterController extends Controller
             );
         }
 
-        DB::transaction(function () use (
-            $validated,
-            $character,
-            $stages,
-            $unassignedStageIds
-        ): void {
-            $character->update($validated);
-            $this->syncStages($character, $stages, $unassignedStageIds);
-        });
+        $character->update($validated);
 
         return redirect()
             ->route('admin.characters.index')
@@ -121,10 +104,6 @@ class GbfCharacterController extends Controller
         Request $request,
         ?GbfCharacter $character = null
     ): array {
-        $existingStageIds = $character
-            ? $character->stages()->pluck('id')->all()
-            : [];
-
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
 
@@ -157,49 +136,6 @@ class GbfCharacterController extends Controller
                 'image',
                 'mimes:jpg,jpeg,png,webp',
                 'max:5120',
-            ],
-
-            'sort_order' => [
-                'required',
-                'integer',
-                'min:0',
-                'max:65535',
-            ],
-
-            'stages' => ['nullable', 'array'],
-            'stages.*.id' => [
-                'nullable',
-                'integer',
-                Rule::exists('gbf_character_stages', 'id')
-                    ->where('character_id', $character?->id ?? 0),
-            ],
-            'stages.*.stage_key' => [
-                'required',
-                'string',
-                'max:80',
-                'distinct',
-                Rule::unique('gbf_character_stages', 'stage_key')
-                    ->where(fn (Builder $query) => $query->where(
-                        'character_id',
-                        $character?->id ?? 0
-                    ))
-                    ->whereNotIn('id', $existingStageIds),
-            ],
-            'stages.*.name' => ['required', 'string', 'max:255'],
-            'stages.*.description' => ['nullable', 'string'],
-            'stages.*.sort_order' => [
-                'required',
-                'integer',
-                'min:0',
-                'max:65535',
-            ],
-            'unassigned_stage_ids' => ['nullable', 'array'],
-            'unassigned_stage_ids.*' => [
-                'required',
-                'integer',
-                'distinct',
-                Rule::exists('gbf_character_stages', 'id')
-                    ->whereNull('character_id'),
             ],
         ]);
     }
