@@ -11,11 +11,23 @@ class GbfCharacterStageMaterial extends Model
 
     protected $fillable = [
         'character_stage_id',
+        'assignment_id',
         'material_id',
         'quantity',
         'notes',
     ];
 
+    public function assignment(): BelongsTo
+    {
+        return $this->belongsTo(
+            GbfCharacterStageAssignment::class,
+            'assignment_id'
+        );
+    }
+
+    /**
+     * Relasi legacy untuk data material lama.
+     */
     public function stage(): BelongsTo
     {
         return $this->belongsTo(

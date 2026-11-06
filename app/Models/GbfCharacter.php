@@ -19,9 +19,28 @@ class GbfCharacter extends Model
         'sort_order',
     ];
 
-    public function stages(): HasMany
+    public function stageAssignments(): HasMany
     {
-        return $this->hasMany(GbfCharacterStage::class, 'character_id')
-            ->orderBy('sort_order');
+        return $this->hasMany(
+            GbfCharacterStageAssignment::class,
+            'character_id'
+        )->orderBy('sort_order');
+    }
+
+    /**
+     * Relasi ini mempertahankan akses ke daftar stage,
+     * tetapi detail progression menggunakan stageAssignments().
+     */
+    public function stages()
+    {
+        return $this->belongsToMany(
+            GbfCharacterStage::class,
+            'gbf_character_stage_assignments',
+            'character_id',
+            'character_stage_id'
+        )
+            ->withPivot(['id', 'sort_order'])
+            ->withTimestamps()
+            ->orderByPivot('sort_order');
     }
 }
