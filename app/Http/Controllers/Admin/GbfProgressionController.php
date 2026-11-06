@@ -241,8 +241,7 @@ class GbfProgressionController extends Controller
                         ->orWhere('character_id', $character->id);
                 });
             })
-            ->orderBy('sort_order')
             ->orderBy('name')
-            ->get(['id', 'character_id', 'name', 'sort_order']);
+            ->get(['id', 'character_id', 'name']);
     }
 }
