@@ -321,13 +321,18 @@
         let nextStageIndex = {{ $nextStageIndex }};
 
         function refreshStageOptions() {
-            const selectedCharacterId = characterSelect.value;
-            const stageSelects = Array.from(stageList.querySelectorAll('.progression-stage-select'));
+            const stageSelects = Array.from(
+                stageList.querySelectorAll('.progression-stage-select')
+            );
 
             stageSelects.forEach(function (select) {
                 const otherSelectedIds = stageSelects
-                    .filter(function (otherSelect) { return otherSelect !== select; })
-                    .map(function (otherSelect) { return otherSelect.value; })
+                    .filter(function (otherSelect) {
+                        return otherSelect !== select;
+                    })
+                    .map(function (otherSelect) {
+                        return otherSelect.value;
+                    })
                     .filter(Boolean);
 
                 Array.from(select.options).forEach(function (option) {
@@ -335,14 +340,8 @@
                         return;
                     }
 
-                    const ownerId = option.dataset.characterId;
-                    const usedElsewhere = otherSelectedIds.includes(option.value);
-                    option.disabled = (ownerId && ownerId !== selectedCharacterId) || usedElsewhere;
+                    option.disabled = otherSelectedIds.includes(option.value);
                 });
-
-                if (select.selectedOptions[0]?.disabled) {
-                    select.value = '';
-                }
             });
         }
 
@@ -382,7 +381,6 @@
             updateStageNumbers();
         });
 
-        characterSelect.addEventListener('change', refreshStageOptions);
         form.addEventListener('change', function (event) {
             if (event.target.matches('.progression-stage-select')) {
                 refreshStageOptions();
