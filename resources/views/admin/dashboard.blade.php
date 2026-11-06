@@ -48,6 +48,12 @@
             >
                 Atur Progression →
             </a>
+            <a
+                href="{{ route('admin.database-structure.index') }}"
+                class="admin-button admin-button-secondary"
+            >
+                Lihat Struktur DB →
+            </a>
         </div>
     </div>
 </div>

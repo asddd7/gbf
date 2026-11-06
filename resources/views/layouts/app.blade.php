@@ -102,6 +102,21 @@
                         </svg>
                         <span>Progression</span>
                     </a>
+
+                    <a
+                        href="{{ route('admin.database-structure.index') }}"
+                        @class([
+                            'admin-nav-link',
+                            'is-active' => request()->routeIs('admin.database-structure.*'),
+                        ])
+                        @if (request()->routeIs('admin.database-structure.*')) aria-current="page" @endif
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M4.5 6.75c0-1.24 3.36-2.25 7.5-2.25s7.5 1.01 7.5 2.25S16.14 9 12 9 4.5 7.99 4.5 6.75Z" stroke="currentColor" stroke-width="1.7"/>
+                            <path d="M4.5 6.75v5.25c0 1.24 3.36 2.25 7.5 2.25m7.5-7.5V12M4.5 12v5.25c0 1.24 3.36 2.25 7.5 2.25m0-7.5c4.14 0 7.5-1.01 7.5-2.25v5.25c0 1.24-3.36 2.25-7.5 2.25m0 0V12" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+                        </svg>
+                        <span>Struktur DB</span>
+                    </a>
                 </nav>
 
                 <div class="admin-sidebar-footer">

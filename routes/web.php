@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\GbfCharacterController;
 use App\Http\Controllers\Admin\GbfCharacterStageController;
 use App\Http\Controllers\Admin\GbfMaterialController;
 use App\Http\Controllers\Admin\GbfProgressionController;
+use App\Http\Controllers\Admin\DatabaseStructureController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
@@ -16,6 +17,9 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/dashboard', function () {
             return view('admin.dashboard');
         })->name('dashboard');
+
+        Route::get('/database-structure', [DatabaseStructureController::class, 'index'])
+            ->name('database-structure.index');
 
         Route::resource('characters', GbfCharacterController::class)
             ->except(['show']);
