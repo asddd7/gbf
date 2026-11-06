@@ -117,7 +117,6 @@
                                         @foreach ($stages as $stage)
                                             <option
                                                 value="{{ $stage->id }}"
-                                                data-character-id="{{ $stage->character_id ?? '' }}"
                                                 @selected((string) ($stageRow['stage_id'] ?? '') === (string) $stage->id)
                                             >
                                                 {{ $stage->name }}
@@ -232,36 +231,50 @@
         <section class="progression-stage-card">
             <div class="progression-stage-heading">
                 <span class="progression-stage-number"></span>
+
                 <div class="progression-stage-fields">
                     <div class="admin-form-group">
                         <label>Tahap *</label>
-                        <select name="stages[__STAGE__][stage_id]" class="progression-stage-select" required>
+
+                        <select
+                            name="stages[__STAGE__][stage_id]"
+                            class="progression-stage-select"
+                            required
+                        >
                             <option value="">Pilih tahap</option>
+
                             @foreach ($stages as $stage)
-                                <option
-                                    value="{{ $stage->id }}"
-                                    data-character-id="{{ $stage->character_id ?? '' }}"
-                                >
+                                <option value="{{ $stage->id }}">
                                     {{ $stage->name }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
                 </div>
-                <button type="button" class="admin-button admin-button-danger progression-remove-stage">
+
+                <button
+                    type="button"
+                    class="admin-button admin-button-danger progression-remove-stage"
+                >
                     Hapus Tahap
                 </button>
             </div>
+
             <div class="progression-materials">
                 <div class="progression-materials-heading">
                     <div>
                         <h3>Item & Quantity</h3>
                         <p>Item yang sama hanya dapat ditambahkan satu kali dalam satu tahap.</p>
                     </div>
-                    <button type="button" class="admin-button admin-button-secondary progression-add-material">
+
+                    <button
+                        type="button"
+                        class="admin-button admin-button-secondary progression-add-material"
+                    >
                         + Tambah Item
                     </button>
                 </div>
+
                 <div class="progression-material-list"></div>
             </div>
         </section>
