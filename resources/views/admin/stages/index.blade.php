@@ -12,7 +12,7 @@
         <div>
             <span class="admin-eyebrow">DATA MANAGEMENT</span>
             <h1>Tahap Character</h1>
-            <p>Kelola nama tahap dan urutan tampilnya.</p>
+            <p>Kelola daftar nama tahap yang dapat digunakan dalam progression karakter.</p>
         </div>
 
         <a href="{{ route('admin.stages.create') }}" class="admin-button admin-button-primary">
@@ -43,7 +43,6 @@
                 <thead>
                     <tr>
                         <th>Nama Tahap</th>
-                        <th>Urutan</th>
                         <th class="text-right">Aksi</th>
                     </tr>
                 </thead>
@@ -53,7 +52,6 @@
                             <td>
                                 <strong>{{ $stage->name }}</strong>
                             </td>
-                            <td>{{ $stage->sort_order }}</td>
                             <td>
                                 <div class="admin-actions">
                                     <a
@@ -62,6 +60,7 @@
                                     >
                                         Edit
                                     </a>
+
                                     <form
                                         method="POST"
                                         action="{{ route('admin.stages.destroy', $stage) }}"
@@ -69,6 +68,7 @@
                                     >
                                         @csrf
                                         @method('DELETE')
+
                                         <button type="submit" class="admin-button admin-button-danger">
                                             Hapus
                                         </button>
@@ -78,7 +78,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="3" class="admin-empty">
+                            <td colspan="2" class="admin-empty">
                                 Belum ada tahap. Silakan tambahkan tahap pertama.
                             </td>
                         </tr>
