@@ -120,7 +120,7 @@
                                                 data-character-id="{{ $stage->character_id ?? '' }}"
                                                 @selected((string) ($stageRow['stage_id'] ?? '') === (string) $stage->id)
                                             >
-                                                {{ $stage->name }} (Urutan {{ $stage->sort_order }})
+                                                {{ $stage->name }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -242,7 +242,7 @@
                                     value="{{ $stage->id }}"
                                     data-character-id="{{ $stage->character_id ?? '' }}"
                                 >
-                                    {{ $stage->name }} (Urutan {{ $stage->sort_order }})
+                                    {{ $stage->name }}
                                 </option>
                             @endforeach
                         </select>
