@@ -14,7 +14,6 @@ class GbfCharacterStageController extends Controller
     public function index(): View
     {
         $stages = GbfCharacterStage::query()
-            ->orderBy('sort_order')
             ->orderBy('name')
             ->paginate(15);
 
@@ -29,7 +28,11 @@ class GbfCharacterStageController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $this->validateStage($request);
-        $validated['stage_key'] = $this->makeUniqueStageKey($validated['name']);
+
+        $validated['stage_key'] = $this->makeUniqueStageKey(
+            $validated['name']
+        );
+
         GbfCharacterStage::create($validated);
 
         return redirect()
@@ -66,7 +69,6 @@ class GbfCharacterStageController extends Controller
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'sort_order' => ['required', 'integer', 'min:0', 'max:65535'],
         ]);
     }
 
@@ -78,7 +80,12 @@ class GbfCharacterStageController extends Controller
 
         while (GbfCharacterStage::query()->where('stage_key', $stageKey)->exists()) {
             $suffix = '-'.$counter;
-            $stageKey = Str::limit($baseKey, 80 - strlen($suffix), '').$suffix;
+            $stageKey = Str::limit(
+                $baseKey,
+                80 - strlen($suffix),
+                ''
+            ).$suffix;
+
             $counter++;
         }
 

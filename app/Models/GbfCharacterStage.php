@@ -15,7 +15,6 @@ class GbfCharacterStage extends Model
         'stage_key',
         'name',
         'description',
-        'sort_order',
     ];
 
     public function character(): BelongsTo
