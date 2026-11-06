@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\GbfCharacter;
 use App\Models\GbfCharacterStage;
+use App\Models\GbfCharacterStageAssignment;
 use App\Models\GbfMaterial;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,7 +18,7 @@ class GbfProgressionController extends Controller
     public function index(): View
     {
         $characters = GbfCharacter::query()
-            ->whereHas('stages')
+            ->whereHas('stageAssignments')
             ->orderBy('name')
             ->get(['id', 'name']);
 
@@ -29,9 +30,11 @@ class GbfProgressionController extends Controller
         $characters = GbfCharacter::query()
             ->orderBy('name')
             ->get(['id', 'name']);
+
         $progressionCharacter = null;
         $progressionRows = [];
         $stages = $this->availableStages();
+
         $materials = GbfMaterial::query()
             ->orderBy('name')
             ->get(['id', 'name', 'unit']);
@@ -48,29 +51,43 @@ class GbfProgressionController extends Controller
     public function show(GbfCharacter $character): View
     {
         $character->load([
-            'stages.materials.material',
+            'stageAssignments.stage',
+            'stageAssignments.materials.material',
         ]);
 
-        abort_if($character->stages->isEmpty(), 404);
+        abort_if($character->stageAssignments->isEmpty(), 404);
 
         return view('admin.progression.show', compact('character'));
     }
 
     public function edit(GbfCharacter $character): View
     {
-        $character->load(['stages.materials.material']);
-        abort_if($character->stages->isEmpty(), 404);
+        $character->load([
+            'stageAssignments.stage',
+            'stageAssignments.materials.material',
+        ]);
+
+        abort_if($character->stageAssignments->isEmpty(), 404);
 
         $characters = collect();
         $progressionCharacter = $character;
-        $progressionRows = $character->stages->map(fn (GbfCharacterStage $stage) => [
-            'stage_id' => $stage->id,
-            'materials' => $stage->materials->map(fn ($row) => [
-                'material_id' => $row->material_id,
-                'quantity' => $row->quantity,
-            ])->values()->all(),
-        ])->values()->all();
-        $stages = $this->availableStages($character);
+
+        $progressionRows = $character->stageAssignments
+            ->map(fn (GbfCharacterStageAssignment $assignment) => [
+                'stage_id' => $assignment->character_stage_id,
+                'materials' => $assignment->materials
+                    ->map(fn ($row) => [
+                        'material_id' => $row->material_id,
+                        'quantity' => $row->quantity,
+                    ])
+                    ->values()
+                    ->all(),
+            ])
+            ->values()
+            ->all();
+
+        $stages = $this->availableStages();
+
         $materials = GbfMaterial::query()
             ->orderBy('name')
             ->get(['id', 'name', 'unit']);
@@ -89,6 +106,7 @@ class GbfProgressionController extends Controller
         $validated = $this->validateProgression($request);
 
         $character = GbfCharacter::findOrFail($validated['character_id']);
+
         $this->saveStages($character, $validated['stages']);
 
         return redirect()
@@ -96,9 +114,15 @@ class GbfProgressionController extends Controller
             ->with('success', 'Pengaturan progression karakter berhasil disimpan.');
     }
 
-    public function update(Request $request, GbfCharacter $character): RedirectResponse
-    {
-        $validated = $this->validateProgression($request, allowEmptyStages: true);
+    public function update(
+        Request $request,
+        GbfCharacter $character
+    ): RedirectResponse {
+        $validated = $this->validateProgression(
+            $request,
+            allowEmptyStages: true
+        );
+
         $this->saveStages($character, $validated['stages'] ?? []);
 
         if (empty($validated['stages'])) {
@@ -120,17 +144,23 @@ class GbfProgressionController extends Controller
             'stages' => $allowEmptyStages
                 ? ['nullable', 'array']
                 : ['required', 'array', 'min:1'],
+
             'stages.*.stage_id' => [
                 'required',
                 'integer',
                 'distinct',
                 'exists:gbf_character_stages,id',
             ],
+
             'stages.*.materials' => [
                 'required',
                 'array',
                 'min:1',
-                function (string $attribute, mixed $value, \Closure $fail): void {
+                function (
+                    string $attribute,
+                    mixed $value,
+                    \Closure $fail
+                ): void {
                     if (! is_array($value)) {
                         return;
                     }
@@ -146,11 +176,13 @@ class GbfProgressionController extends Controller
                     }
                 },
             ],
+
             'stages.*.materials.*.material_id' => [
                 'required',
                 'integer',
                 'exists:gbf_materials,id',
             ],
+
             'stages.*.materials.*.quantity' => [
                 'required',
                 'integer',
@@ -160,19 +192,32 @@ class GbfProgressionController extends Controller
         ];
 
         if (! $allowEmptyStages) {
-            $rules['character_id'] = ['required', 'integer', 'exists:gbf_characters,id'];
+            $rules['character_id'] = [
+                'required',
+                'integer',
+                'exists:gbf_characters,id',
+            ];
         }
 
         return $request->validate($rules);
     }
 
-    private function saveStages(GbfCharacter $character, array $stageRows): void
-    {
+    private function saveStages(
+        GbfCharacter $character,
+        array $stageRows
+    ): void {
         DB::transaction(function () use ($character, $stageRows): void {
             $stageIds = collect($stageRows)
                 ->pluck('stage_id')
                 ->map(fn ($id) => (int) $id)
                 ->all();
+
+            if (count($stageIds) !== count(array_unique($stageIds))) {
+                throw ValidationException::withMessages([
+                    'stages' => 'Tahap yang sama tidak boleh dipilih lebih dari sekali.',
+                ]);
+            }
+
             $stages = $stageIds === []
                 ? collect()
                 : GbfCharacterStage::query()
@@ -183,65 +228,77 @@ class GbfProgressionController extends Controller
 
             if ($stages->count() !== count($stageIds)) {
                 throw ValidationException::withMessages([
-                    'stages' => 'Salah satu tahap tidak lagi tersedia. Silakan muat ulang halaman.',
+                    'stages' => 'Salah satu tahap tidak ditemukan. Silakan muat ulang halaman.',
                 ]);
             }
 
-            foreach ($stageRows as $index => $stageRow) {
-                $stage = $stages->get((int) $stageRow['stage_id']);
+            $existingAssignments = GbfCharacterStageAssignment::query()
+                ->where('character_id', $character->id)
+                ->get()
+                ->keyBy('character_stage_id');
 
-                if ($stage->character_id !== null && (int) $stage->character_id !== $character->id) {
-                    throw ValidationException::withMessages([
-                        "stages.{$index}.stage_id" => 'Tahap ini sudah digunakan oleh karakter lain.',
+            $keptAssignmentIds = [];
+
+            foreach ($stageRows as $index => $stageRow) {
+                $stageId = (int) $stageRow['stage_id'];
+
+                $assignment = $existingAssignments->get($stageId);
+
+                if (! $assignment) {
+                    $assignment = GbfCharacterStageAssignment::create([
+                        'character_id' => $character->id,
+                        'character_stage_id' => $stageId,
+                        'sort_order' => $index + 1,
+                    ]);
+                } else {
+                    $assignment->update([
+                        'sort_order' => $index + 1,
                     ]);
                 }
-            }
 
-            $characterStages = $character->stages();
-            if ($stageIds === []) {
-                $characterStages->update(['character_id' => null]);
-            } else {
-                $characterStages->whereNotIn('id', $stageIds)
-                    ->update(['character_id' => null]);
-            }
-
-            foreach ($stageRows as $stageRow) {
-                $stage = $stages->get((int) $stageRow['stage_id']);
-                if ($stage->character_id === null) {
-                    $stage->update(['character_id' => $character->id]);
-                }
+                $keptAssignmentIds[] = $assignment->id;
 
                 $materialRows = $stageRow['materials'];
+
                 $materialIds = collect($materialRows)
                     ->pluck('material_id')
                     ->map(fn ($id) => (int) $id)
                     ->all();
 
-                $stage->materials()
+                $assignment->materials()
                     ->whereNotIn('material_id', $materialIds)
                     ->delete();
 
                 foreach ($materialRows as $materialRow) {
-                    $stage->materials()->updateOrCreate(
-                        ['material_id' => $materialRow['material_id']],
-                        ['quantity' => $materialRow['quantity']]
+                    $assignment->materials()->updateOrCreate(
+                        [
+                            'material_id' => (int) $materialRow['material_id'],
+                        ],
+                        [
+                            'character_stage_id' => $stageId,
+                            'quantity' => (int) $materialRow['quantity'],
+                        ]
                     );
                 }
+            }
+
+            $assignmentsToRemove = GbfCharacterStageAssignment::query()
+                ->where('character_id', $character->id);
+
+            if ($keptAssignmentIds === []) {
+                $assignmentsToRemove->delete();
+            } else {
+                $assignmentsToRemove
+                    ->whereNotIn('id', $keptAssignmentIds)
+                    ->delete();
             }
         });
     }
 
-    private function availableStages(?GbfCharacter $character = null)
+    private function availableStages()
     {
         return GbfCharacterStage::query()
-            ->with('character:id,name')
-            ->when($character, function ($query) use ($character): void {
-                $query->where(function ($query) use ($character): void {
-                    $query->whereNull('character_id')
-                        ->orWhere('character_id', $character->id);
-                });
-            })
             ->orderBy('name')
-            ->get(['id', 'character_id', 'name']);
+            ->get(['id', 'name']);
     }
 }

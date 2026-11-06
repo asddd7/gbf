@@ -14,10 +14,12 @@
             <h1>{{ $character->name }}</h1>
             <p>Daftar tahap, item, dan quantity yang dibutuhkan karakter.</p>
         </div>
+
         <div class="progression-detail-actions">
             <a href="{{ route('admin.progression.index') }}" class="admin-button admin-button-secondary">
                 Kembali
             </a>
+
             <a
                 href="{{ route('admin.progression.edit', $character) }}"
                 class="admin-button admin-button-primary"
@@ -28,17 +30,22 @@
     </div>
 
     @if (session('success'))
-        <div class="admin-alert admin-alert-success">{{ session('success') }}</div>
+        <div class="admin-alert admin-alert-success">
+            {{ session('success') }}
+        </div>
     @endif
 
     <div class="progression-detail-list">
-        @foreach ($character->stages as $stage)
+        @foreach ($character->stageAssignments as $assignment)
             <section class="admin-panel progression-detail-stage">
                 <div class="admin-panel-heading progression-detail-stage-heading">
-                    <div class="progression-stage-number">{{ $loop->iteration }}</div>
+                    <div class="progression-stage-number">
+                        {{ $loop->iteration }}
+                    </div>
+
                     <div>
-                        <span class="admin-eyebrow">TAHAP {{ $stage->sort_order }}</span>
-                        <h2>{{ $stage->name }}</h2>
+                        <span class="admin-eyebrow">TAHAP {{ $loop->iteration }}</span>
+                        <h2>{{ $assignment->stage->name }}</h2>
                     </div>
                 </div>
 
@@ -51,8 +58,9 @@
                                 <th>Satuan</th>
                             </tr>
                         </thead>
+
                         <tbody>
-                            @forelse ($stage->materials as $stageMaterial)
+                            @forelse ($assignment->materials as $stageMaterial)
                                 <tr>
                                     <td>
                                         <strong>{{ $stageMaterial->material->name }}</strong>
