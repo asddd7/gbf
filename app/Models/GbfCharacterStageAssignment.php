@@ -23,7 +23,10 @@ class GbfCharacterStageAssignment extends Model
 
     public function stage(): BelongsTo
     {
-        return $this->belongsTo(GbfCharacterStage::class, 'character_stage_id');
+        return $this->belongsTo(
+            GbfCharacterStage::class,
+            'character_stage_id'
+        );
     }
 
     public function materials(): HasMany
