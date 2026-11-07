@@ -46,6 +46,10 @@ Route::middleware(['auth', 'role:admin'])
     });
 
 Route::get('/dashboard', DashboardController::class)->name('dashboard');
+Route::get('/eternals', [DashboardController::class, 'eternals'])
+    ->name('characters.eternals');
+Route::get('/evokers', [DashboardController::class, 'evokers'])
+    ->name('characters.evokers');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

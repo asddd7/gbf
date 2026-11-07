@@ -18,41 +18,62 @@ function dashboardCharacter(
     ]);
 }
 
-test('guest dashboard shows eternal and evoker character tabs', function () {
+test('guest dashboard presents two category links without listing characters', function () {
     dashboardCharacter('Seofon', 'eternal');
     dashboardCharacter('Maria Theresa', 'evoker');
 
     $this->get(route('dashboard'))
         ->assertOk()
-        ->assertSee('Rencanakan perjalananmu.')
-        ->assertSee('Eternals')
-        ->assertSee('Evokers')
-        ->assertSee('Seofon')
-        ->assertSee('Maria Theresa')
-        ->assertSee('aria-selected="true"', false)
-        ->assertSee('aria-selected="false"', false)
-        ->assertSee('hidden', false);
+        ->assertSee('Eternal')
+        ->assertSee('Evoker')
+        ->assertSee(route('characters.eternals'))
+        ->assertSee(route('characters.evokers'))
+        ->assertDontSee('Seofon')
+        ->assertDontSee('Maria Theresa');
 });
 
-test('signed-in user dashboard shows their welcome and available characters', function () {
-    $user = User::factory()->create(['name' => 'Granblue Player']);
+test('eternal and evoker options open separate pages with only their characters', function () {
+    dashboardCharacter('Seofon', 'eternal');
     dashboardCharacter('Siete', 'eternal', 1);
-    dashboardCharacter('Nier', 'evoker', 2);
+    dashboardCharacter('Maria Theresa', 'evoker');
+    dashboardCharacter('Nier', 'evoker', 1);
+
+    $this->get(route('characters.eternals'))
+        ->assertOk()
+        ->assertSee('Eternals')
+        ->assertSee('Seofon')
+        ->assertSee('Siete')
+        ->assertDontSee('Maria Theresa')
+        ->assertDontSee('Nier');
+
+    $this->get(route('characters.evokers'))
+        ->assertOk()
+        ->assertSee('Evokers')
+        ->assertSee('Maria Theresa')
+        ->assertSee('Nier')
+        ->assertDontSee('Seofon')
+        ->assertDontSee('Siete');
+});
+
+test('dashboard category pages show empty state when category has no characters', function () {
+    dashboardCharacter('Seofon', 'eternal');
+
+    $this->get(route('characters.evokers'))
+        ->assertOk()
+        ->assertSee('Belum ada karakter Evoker');
+});
+
+test('signed-in users can access the same category pages', function () {
+    $user = User::factory()->create(['name' => 'Granblue Player']);
+    dashboardCharacter('Nier', 'evoker');
 
     $this->actingAs($user)
         ->get(route('dashboard'))
         ->assertOk()
-        ->assertSee('Selamat datang, Granblue Player.')
-        ->assertSee('Siete')
-        ->assertSee('Nier');
-});
+        ->assertSee('Evoker')
+        ->assertDontSee('Nier');
 
-test('dashboard displays a helpful empty state for character categories without entries', function () {
-    dashboardCharacter('Seofon', 'eternal');
-
-    $this->get(route('dashboard'))
+    $this->get(route('characters.evokers'))
         ->assertOk()
-        ->assertSee('Belum ada Evoker')
-        ->assertSee('1 karakter')
-        ->assertSee('0 karakter');
+        ->assertSee('Nier');
 });
