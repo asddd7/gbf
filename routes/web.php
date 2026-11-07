@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\GbfCharacterController;
 use App\Http\Controllers\Admin\GbfCharacterStageController;
 use App\Http\Controllers\Admin\GbfMaterialController;
@@ -44,9 +45,7 @@ Route::middleware(['auth', 'role:admin'])
             ->name('progression.update');
     });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->name('dashboard');
+Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
