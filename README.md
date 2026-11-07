@@ -14,7 +14,13 @@ Koneksi Aiven tersedia dengan nama `mysql_aiven`. Isi konfigurasi koneksi dan se
 Buka terminal VS Code di folder proyek, lalu jalankan query baca untuk memastikan koneksi:
 
 ```powershell
-php artisan tinker --execute="dump(DB::connection('mysql_aiven')->select('SELECT DATABASE() AS database_name, NOW() AS server_time'))"
+& "C:\laragon\bin\mysql\mysql-8.4.3-winx64\bin\mysql.exe" `
+    --host=mysql-3d305f1-adipatisuryadimyati-3ada.g.aivencloud.com `
+    --port=28122 `
+    --user=avnadmin `
+    --password `
+    --ssl-mode=REQUIRED `
+    defaultdb `
 ```
 
 Contoh mengambil beberapa baris dari tabel `users`:
