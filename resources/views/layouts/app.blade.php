@@ -173,7 +173,6 @@
                         'is-active' => request()->routeIs('dashboard'),
                     ])
                     @if (request()->routeIs('dashboard')) aria-current="page" @endif
-                >
                     aria-label="Beranda"
                     title="Beranda"
                 >
