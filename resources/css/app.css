@@ -474,11 +474,13 @@ body.dark {
 
 .dashboard-character-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
 }
 
 .dashboard-character-card {
+    display: grid;
+    grid-template-columns: minmax(105px, 34%) minmax(0, 1fr);
     min-width: 0;
     overflow: hidden;
     border: 1px solid var(--border);
@@ -497,7 +499,7 @@ body.dark {
 .dashboard-character-art {
     position: relative;
     display: grid;
-    aspect-ratio: 1.35 / 1;
+    min-height: 148px;
     overflow: hidden;
     place-items: center;
     background: linear-gradient(145deg, #e0e7ff, #f8fafc 72%);
@@ -544,8 +546,10 @@ body.dark {
 
 .dashboard-character-info {
     display: grid;
+    min-width: 0;
+    align-content: center;
     gap: 7px;
-    padding: 13px;
+    padding: 15px;
 }
 
 .dashboard-character-title {
@@ -718,8 +722,16 @@ body.dark {
     }
 
     .dashboard-character-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: 1fr;
         gap: 12px;
+    }
+
+    .dashboard-character-card {
+        grid-template-columns: 130px minmax(0, 1fr);
+    }
+
+    .dashboard-character-art {
+        min-height: 132px;
     }
 }
 
@@ -746,19 +758,21 @@ body.dark {
         gap: 9px;
     }
 
+    .dashboard-character-card {
+        grid-template-columns: 105px minmax(0, 1fr);
+    }
+
     .dashboard-character-art {
-        aspect-ratio: 1 / 1;
+        min-height: 116px;
     }
 
     .dashboard-character-info {
         gap: 6px;
-        padding: 9px;
+        padding: 10px;
     }
 
     .dashboard-character-title {
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 5px;
+        align-items: center;
     }
 
     .dashboard-character-title h3 {
@@ -774,7 +788,7 @@ body.dark {
 
 @media (min-width: 768px) and (max-width: 1050px) {
     .dashboard-character-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
