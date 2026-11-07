@@ -294,6 +294,68 @@ body.dark {
     padding: 35px 25px;
 }
 
+.public-layout .main-content {
+    padding-bottom: 116px;
+}
+
+.public-bottom-nav {
+    position: fixed;
+    z-index: 90;
+    right: 50%;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    display: flex;
+    width: min(760px, calc(100% - 40px));
+    min-height: 64px;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 8px;
+    transform: translateX(50%);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    box-shadow: 0 12px 36px rgb(15 23 42 / 14%);
+    backdrop-filter: blur(16px);
+}
+
+.public-bottom-nav-link {
+    display: inline-flex;
+    min-width: 0;
+    min-height: 44px;
+    flex: 1 1 0;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+    border-radius: 12px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 650;
+    white-space: nowrap;
+    transition: background 0.18s ease, color 0.18s ease;
+}
+
+.public-bottom-nav-link:hover,
+.public-bottom-nav-link.is-active {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.public-bottom-nav-link:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--primary) 30%, transparent);
+    outline-offset: 2px;
+}
+
+.public-bottom-nav-register {
+    background: var(--primary);
+    color: #ffffff;
+}
+
+.public-bottom-nav-register:hover,
+.public-bottom-nav-register.is-active {
+    background: var(--primary-hover);
+    color: #ffffff;
+}
+
 .page-heading {
     margin-bottom: 24px;
 }
@@ -696,6 +758,28 @@ body.dark {
         padding: 22px 16px;
     }
 
+    .public-layout .main-content {
+        padding-bottom: 104px;
+    }
+
+    .public-bottom-nav {
+        right: 10px;
+        bottom: max(10px, env(safe-area-inset-bottom));
+        width: calc(100% - 20px);
+        min-height: 58px;
+        gap: 2px;
+        padding: 6px;
+        transform: none;
+        border-radius: 16px;
+    }
+
+    .public-bottom-nav-link {
+        min-height: 44px;
+        padding: 0 6px;
+        border-radius: 11px;
+        font-size: 12px;
+    }
+
     .page-title {
         font-size: 22px;
     }
@@ -796,6 +880,16 @@ body.dark {
     .nav-link {
         font-size: 11px;
         padding: 7px 8px;
+    }
+
+    .public-bottom-nav {
+        gap: 0;
+        padding: 5px;
+    }
+
+    .public-bottom-nav-link {
+        padding: 0 4px;
+        font-size: 11px;
     }
 
     .app-header {

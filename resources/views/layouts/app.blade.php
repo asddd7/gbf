@@ -15,7 +15,7 @@
 <body>
     @php($isAdminArea = request()->routeIs('admin.*'))
 
-    <div class="app-layout {{ $isAdminArea ? 'admin-layout' : '' }}">
+    <div class="app-layout {{ $isAdminArea ? 'admin-layout' : 'public-layout' }}">
         @if ($isAdminArea)
             <aside class="admin-sidebar" aria-label="Navigasi admin">
                 <a href="{{ route('admin.dashboard') }}" class="admin-sidebar-brand">
@@ -142,8 +142,8 @@
                     </a>
                 @endif
 
-                <div class="header-actions">
-                    @auth
+                @auth
+                    <div class="header-actions">
                         <span class="user-name">
                             {{ Auth::user()->name ?? Auth::user()->email }}
                         </span>
@@ -155,24 +155,74 @@
                                 Logout
                             </button>
                         </form>
-                    @else
-                        <a href="{{ route('login') }}" class="auth-link">
-                            Masuk
-                        </a>
-
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="button button-primary">
-                                Daftar
-                            </a>
-                        @endif
-                    @endauth
-                </div>
+                    </div>
+                @endauth
             </header>
 
             <main class="main-content">
                 @yield('content')
             </main>
         </div>
+
+        @unless ($isAdminArea)
+            <nav class="public-bottom-nav" aria-label="Navigasi utama">
+                <a
+                    href="{{ route('dashboard') }}"
+                    @class([
+                        'public-bottom-nav-link',
+                        'is-active' => request()->routeIs('dashboard'),
+                    ])
+                    @if (request()->routeIs('dashboard')) aria-current="page" @endif
+                >
+                    <span>Beranda</span>
+                </a>
+                <a
+                    href="{{ route('characters.eternals') }}"
+                    @class([
+                        'public-bottom-nav-link',
+                        'is-active' => request()->routeIs('characters.eternals'),
+                    ])
+                    @if (request()->routeIs('characters.eternals')) aria-current="page" @endif
+                >
+                    <span>Eternal</span>
+                </a>
+                <a
+                    href="{{ route('characters.evokers') }}"
+                    @class([
+                        'public-bottom-nav-link',
+                        'is-active' => request()->routeIs('characters.evokers'),
+                    ])
+                    @if (request()->routeIs('characters.evokers')) aria-current="page" @endif
+                >
+                    <span>Evoker</span>
+                </a>
+                @guest
+                    <a
+                        href="{{ route('login') }}"
+                        @class([
+                            'public-bottom-nav-link',
+                            'is-active' => request()->routeIs('login'),
+                        ])
+                        @if (request()->routeIs('login')) aria-current="page" @endif
+                    >
+                        <span>Masuk</span>
+                    </a>
+                    @if (Route::has('register'))
+                        <a
+                            href="{{ route('register') }}"
+                            @class([
+                                'public-bottom-nav-link',
+                                'public-bottom-nav-register',
+                                'is-active' => request()->routeIs('register'),
+                            ])
+                            @if (request()->routeIs('register')) aria-current="page" @endif
+                        >
+                            <span>Daftar</span>
+                        </a>
+                    @endif
+                @endguest
+            </nav>
+        @endunless
     </div>
 
     @stack('scripts')

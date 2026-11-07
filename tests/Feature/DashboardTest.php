@@ -28,6 +28,9 @@ test('guest dashboard presents two category links without listing characters', f
         ->assertSee('Evoker')
         ->assertSee(route('characters.eternals'))
         ->assertSee(route('characters.evokers'))
+        ->assertSee('Navigasi utama')
+        ->assertSee(route('login'))
+        ->assertSee(route('register'))
         ->assertDontSee('Seofon')
         ->assertDontSee('Maria Theresa');
 });
@@ -71,6 +74,9 @@ test('signed-in users can access the same category pages', function () {
         ->get(route('dashboard'))
         ->assertOk()
         ->assertSee('Evoker')
+        ->assertSee(route('characters.eternals'))
+        ->assertSee(route('characters.evokers'))
+        ->assertDontSee(route('register'))
         ->assertDontSee('Nier');
 
     $this->get(route('characters.evokers'))
