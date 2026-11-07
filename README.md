@@ -7,6 +7,42 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Menjalankan query ke database Aiven
+
+Koneksi Aiven tersedia dengan nama `mysql_aiven`. Isi konfigurasi koneksi dan sertifikat SSL Aiven di `.env` menggunakan variabel `DB_AIVEN_*` (atau variabel `DB_*` yang menjadi fallback). Jangan menaruh password atau kredensial database langsung di command terminal.
+
+Buka terminal VS Code di folder proyek, lalu jalankan query baca untuk memastikan koneksi:
+
+```powershell
+php artisan tinker --execute="dump(DB::connection('mysql_aiven')->select('SELECT DATABASE() AS database_name, NOW() AS server_time'))"
+```
+
+Contoh mengambil beberapa baris dari tabel `users`:
+
+```powershell
+php artisan tinker --execute="dump(DB::connection('mysql_aiven')->select('SELECT * FROM users LIMIT 10'))"
+```
+
+Untuk menjalankan query lain, ganti SQL di dalam `select(...)`. Gunakan query `SELECT` untuk membaca data. Query yang mengubah atau menghapus data akan langsung berdampak pada database Aiven.
+
+Jika baru mengubah nilai `.env` dan konfigurasi belum terbaca, bersihkan cache konfigurasi terlebih dahulu:
+
+```powershell
+php artisan config:clear
+```
+
+Alternatifnya, buka Tinker interaktif:
+
+```powershell
+php artisan tinker
+```
+
+Kemudian jalankan query, misalnya:
+
+```php
+DB::connection('mysql_aiven')->select('SELECT DATABASE() AS database_name, NOW() AS server_time');
+```
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
