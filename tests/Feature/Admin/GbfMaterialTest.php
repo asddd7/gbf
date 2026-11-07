@@ -2,6 +2,7 @@
 
 use App\Models\GbfCharacter;
 use App\Models\GbfCharacterStage;
+use App\Models\GbfCharacterStageAssignment;
 use App\Models\GbfCharacterStageMaterial;
 use App\Models\GbfMaterial;
 use App\Models\Role;
@@ -32,17 +33,13 @@ function materialStage(string $key = 'awakening'): GbfCharacterStage
     ]);
 }
 
-test('admin can create a material and associate it with a character stage', function () {
+test('admin can create a material for the progression catalog', function () {
     $admin = materialAdmin();
-    $stage = materialStage();
 
     $response = $this->actingAs($admin)->post(route('admin.materials.store'), [
         'name' => 'Rusted Weapon',
         'category' => 'Weapon',
         'unit' => 'piece',
-        'stage_ids' => [$stage->id],
-        'quantities' => [$stage->id => 12],
-        'notes' => [$stage->id => 'Any weapon type'],
     ]);
 
     $material = GbfMaterial::where('slug', 'rusted-weapon')->firstOrFail();
@@ -51,15 +48,14 @@ test('admin can create a material and associate it with a character stage', func
         ->assertRedirect(route('admin.materials.index'))
         ->assertSessionHasNoErrors();
 
-    $this->assertDatabaseHas('gbf_character_stage_materials', [
-        'material_id' => $material->id,
-        'character_stage_id' => $stage->id,
-        'quantity' => 12,
-        'notes' => 'Any weapon type',
+    $this->assertDatabaseHas('gbf_materials', [
+        'id' => $material->id,
+        'category' => 'Weapon',
+        'unit' => 'piece',
     ]);
 });
 
-test('admin can update a material and synchronize its character stage associations', function () {
+test('updating a material does not change progression associations', function () {
     $admin = materialAdmin();
     $stage = materialStage();
     $otherStage = materialStage('uncap');
@@ -80,9 +76,6 @@ test('admin can update a material and synchronize its character stage associatio
             'name' => 'Updated Material',
             'category' => 'Treasure',
             'unit' => 'piece',
-            'stage_ids' => [$otherStage->id],
-            'quantities' => [$otherStage->id => 7],
-            'notes' => [$otherStage->id => 'Updated note'],
         ]
     );
 
@@ -96,15 +89,14 @@ test('admin can update a material and synchronize its character stage associatio
         'category' => 'Treasure',
         'unit' => 'piece',
     ]);
-    $this->assertDatabaseMissing('gbf_character_stage_materials', [
-        'material_id' => $material->id,
-        'character_stage_id' => $stage->id,
-    ]);
     $this->assertDatabaseHas('gbf_character_stage_materials', [
         'material_id' => $material->id,
+        'character_stage_id' => $stage->id,
+        'quantity' => 2,
+    ]);
+    $this->assertDatabaseMissing('gbf_character_stage_materials', [
+        'material_id' => $material->id,
         'character_stage_id' => $otherStage->id,
-        'quantity' => 7,
-        'notes' => 'Updated note',
     ]);
 });
 
@@ -141,9 +133,15 @@ test('non-admin users cannot manage materials', function () {
         ->assertForbidden();
 });
 
-test('admin can view material list and assignment forms', function () {
+test('admin can view material list and catalog form with progression relationships', function () {
     $admin = materialAdmin();
     $stage = materialStage();
+    $character = GbfCharacter::where('slug', 'test-character-awakening')->firstOrFail();
+    $assignment = GbfCharacterStageAssignment::create([
+        'character_id' => $character->id,
+        'character_stage_id' => $stage->id,
+        'sort_order' => 1,
+    ]);
     $material = GbfMaterial::create([
         'name' => 'Stage Material',
         'slug' => 'stage-material',
@@ -152,6 +150,7 @@ test('admin can view material list and assignment forms', function () {
 
     $material->stageMaterials()->create([
         'character_stage_id' => $stage->id,
+        'assignment_id' => $assignment->id,
         'quantity' => 3,
     ]);
 
@@ -163,13 +162,13 @@ test('admin can view material list and assignment forms', function () {
 
     $this->get(route('admin.materials.create'))
         ->assertOk()
-        ->assertSee('Relasi Tahap Character')
-        ->assertSee('Awakening');
+        ->assertSee('menu Progression')
+        ->assertDontSee('Relasi Tahap Character');
 
     $this->get(route('admin.materials.edit', $material))
         ->assertOk()
         ->assertSee('Stage Material')
-        ->assertSee('value="3"', false);
+        ->assertSee('menu Progression');
 });
 
 test('admin can create a character with stages for material assignments', function () {

@@ -12,7 +12,7 @@
         <div>
             <span class="admin-eyebrow">DATA MANAGEMENT</span>
             <h1>Materials</h1>
-            <p>Kelola material dan kebutuhan pada setiap tahap karakter.</p>
+            <p>Kelola katalog material. Relasi karakter dan tahap diatur melalui Progression.</p>
         </div>
 
         <a href="{{ route('admin.materials.create') }}" class="admin-button admin-button-primary">
@@ -53,7 +53,7 @@
                     @forelse ($materials as $material)
                         @php
                             $characterNames = $material->stageMaterials
-                                ->map(fn ($stageMaterial) => $stageMaterial->stage?->character?->name)
+                                ->map(fn ($stageMaterial) => $stageMaterial->assignment?->character?->name)
                                 ->filter()
                                 ->unique()
                                 ->values();
@@ -112,7 +112,7 @@
                                     <form
                                         method="POST"
                                         action="{{ route('admin.materials.destroy', $material) }}"
-                                        onsubmit="return confirm('Hapus material ini? Relasi material pada tahap karakter juga akan dihapus.')"
+                                        onsubmit="return confirm('Hapus material ini? Relasi material pada progression karakter juga akan dihapus.')"
                                     >
                                         @csrf
                                         @method('DELETE')

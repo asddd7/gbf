@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\GbfCharacterStage;
 use App\Models\GbfMaterial;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -21,7 +19,7 @@ class GbfMaterialController extends Controller
     public function index(): View
     {
         $materials = GbfMaterial::query()
-            ->with('stageMaterials.stage.character')
+            ->with('stageMaterials.assignment.character')
             ->withCount('stageMaterials')
             ->orderBy('name')
             ->paginate(10);
@@ -31,22 +29,12 @@ class GbfMaterialController extends Controller
 
     public function create(): View
     {
-        $stages = $this->availableStages();
-
-        return view('admin.materials.create', compact('stages'));
+        return view('admin.materials.create');
     }
 
     public function store(Request $request): RedirectResponse
     {
         $validated = $this->validateMaterial($request);
-
-        $stageIds = $validated['stage_ids'] ?? [];
-
-        unset(
-            $validated['stage_ids'],
-            $validated['quantities'],
-            $validated['notes']
-        );
 
         $validated['slug'] = $this->makeUniqueSlug(
             $validated['slug'] ?? $validated['name']
@@ -59,11 +47,7 @@ class GbfMaterialController extends Controller
             );
         }
 
-        DB::transaction(function () use ($validated, $request, $stageIds): void {
-            $material = GbfMaterial::create($validated);
-
-            $this->syncStageMaterials($material, $stageIds, $request);
-        });
+        GbfMaterial::create($validated);
 
         return redirect()
             ->route('admin.materials.index')
@@ -72,23 +56,12 @@ class GbfMaterialController extends Controller
 
     public function edit(GbfMaterial $material): View
     {
-        $material->load('stageMaterials');
-        $stages = $this->availableStages();
-
-        return view('admin.materials.edit', compact('material', 'stages'));
+        return view('admin.materials.edit', compact('material'));
     }
 
     public function update(Request $request, GbfMaterial $material): RedirectResponse
     {
         $validated = $this->validateMaterial($request, $material);
-
-        $stageIds = $validated['stage_ids'] ?? [];
-
-        unset(
-            $validated['stage_ids'],
-            $validated['quantities'],
-            $validated['notes']
-        );
 
         $validated['slug'] = $this->makeUniqueSlug(
             $validated['slug'] ?? $validated['name'],
@@ -102,11 +75,7 @@ class GbfMaterialController extends Controller
             );
         }
 
-        DB::transaction(function () use ($validated, $material, $request, $stageIds): void {
-            $material->update($validated);
-
-            $this->syncStageMaterials($material, $stageIds, $request);
-        });
+        $material->update($validated);
 
         return redirect()
             ->route('admin.materials.index')
@@ -120,15 +89,6 @@ class GbfMaterialController extends Controller
         return redirect()
             ->route('admin.materials.index')
             ->with('success', 'Material berhasil dihapus.');
-    }
-
-    private function availableStages()
-    {
-        return GbfCharacterStage::query()
-            ->with('character')
-            ->orderBy('character_id')
-            ->orderBy('sort_order')
-            ->get();
     }
 
     private function validateMaterial(
@@ -151,44 +111,7 @@ class GbfMaterialController extends Controller
                 'mimes:jpg,jpeg,png,webp',
                 'max:5120',
             ],
-            'stage_ids' => ['nullable', 'array'],
-            'stage_ids.*' => [
-                'required',
-                'integer',
-                'distinct',
-                'exists:gbf_character_stages,id',
-            ],
-            'quantities' => ['nullable', 'array'],
-            'quantities.*' => ['required', 'integer', 'min:1', 'max:4294967295'],
-            'notes' => ['nullable', 'array'],
-            'notes.*' => ['nullable', 'string'],
         ]);
-    }
-
-    private function syncStageMaterials(
-        GbfMaterial $material,
-        array $stageIds,
-        Request $request
-    ): void {
-        if ($stageIds === []) {
-            $material->stageMaterials()->delete();
-
-            return;
-        }
-
-        $material->stageMaterials()
-            ->whereNotIn('character_stage_id', $stageIds)
-            ->delete();
-
-        foreach ($stageIds as $stageId) {
-            $material->stageMaterials()->updateOrCreate(
-                ['character_stage_id' => $stageId],
-                [
-                    'quantity' => $request->input("quantities.{$stageId}", 1),
-                    'notes' => $request->input("notes.{$stageId}"),
-                ]
-            );
-        }
     }
 
     private function makeUniqueSlug(string $value, ?int $ignoreId = null): string
