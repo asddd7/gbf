@@ -356,7 +356,23 @@
         function addMaterial(stageCard) {
             const stageId = stageCard.querySelector('.progression-stage-select').name.match(/stages\[(\d+)\]/)[1];
             const materialList = stageCard.querySelector('.progression-material-list');
-            const materialIndex = materialList.children.length;
+
+            // Cari indeks material terbesar agar nama input tidak duplikat.
+            const existingIndexes = Array.from(
+                materialList.querySelectorAll('[name]')
+            )
+                .map(function (field) {
+                    const match = field.name.match(/\[materials\]\[(\d+)\]/);
+                    return match ? Number(match[1]) : -1;
+                })
+                .filter(function (index) {
+                    return index >= 0;
+                });
+
+            const materialIndex = existingIndexes.length > 0
+                ? Math.max(...existingIndexes) + 1
+                : 0;
+
             const fragment = materialTemplate.content.cloneNode(true);
 
             fragment.querySelectorAll('[name]').forEach(function (field) {
