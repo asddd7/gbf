@@ -25,17 +25,6 @@ class GbfCharacterStageMaterial extends Model
         );
     }
 
-    /**
-     * Relasi legacy untuk data material lama.
-     */
-    public function stage(): BelongsTo
-    {
-        return $this->belongsTo(
-            GbfCharacterStage::class,
-            'character_stage_id'
-        );
-    }
-
     public function material(): BelongsTo
     {
         return $this->belongsTo(GbfMaterial::class, 'material_id');

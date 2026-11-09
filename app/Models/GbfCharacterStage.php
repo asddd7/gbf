@@ -22,16 +22,4 @@ class GbfCharacterStage extends Model
             'character_stage_id'
         );
     }
-
-    /**
-     * Relasi legacy. Material progression baru harus diakses
-     * melalui assignment->materials, bukan relasi ini.
-     */
-    public function materials(): HasMany
-    {
-        return $this->hasMany(
-            GbfCharacterStageMaterial::class,
-            'character_stage_id'
-        );
-    }
 }
