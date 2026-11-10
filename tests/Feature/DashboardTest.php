@@ -18,7 +18,7 @@ function dashboardCharacter(
     ]);
 }
 
-test('guest dashboard presents two category links without listing characters', function () {
+test('guest dashboard presents dashboard and login navigation without listing characters', function () {
     dashboardCharacter('Seofon', 'eternal');
     dashboardCharacter('Maria Theresa', 'evoker');
 
@@ -29,11 +29,10 @@ test('guest dashboard presents two category links without listing characters', f
         ->assertSee(route('characters.eternals'))
         ->assertSee(route('characters.evokers'))
         ->assertSee('Navigasi utama')
-        ->assertSee('aria-label="Beranda"', false)
-        ->assertSee('aria-label="Masuk"', false)
-        ->assertSee('aria-label="Daftar"', false)
+        ->assertSee('aria-label="Dashboard"', false)
+        ->assertSee('aria-label="Login"', false)
         ->assertSee(route('login'))
-        ->assertSee(route('register'))
+        ->assertDontSee(route('register'))
         ->assertDontSee('Seofon')
         ->assertDontSee('Maria Theresa');
 });
@@ -79,6 +78,9 @@ test('signed-in users can access the same category pages', function () {
         ->assertSee('Evoker')
         ->assertSee(route('characters.eternals'))
         ->assertSee(route('characters.evokers'))
+        ->assertSee('aria-label="Profil"', false)
+        ->assertSee(route('profile.edit'))
+        ->assertDontSee('aria-label="Login"', false)
         ->assertDontSee(route('register'))
         ->assertDontSee('Nier');
 

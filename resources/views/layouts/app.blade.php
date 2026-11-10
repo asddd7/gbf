@@ -173,8 +173,8 @@
                         'is-active' => request()->routeIs('dashboard'),
                     ])
                     @if (request()->routeIs('dashboard')) aria-current="page" @endif
-                    aria-label="Beranda"
-                    title="Beranda"
+                    aria-label="Dashboard"
+                    title="Dashboard"
                 >
                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                         <path d="m3.75 10.5 8.25-6.75 8.25 6.75v8.25a1.5 1.5 0 0 1-1.5 1.5h-4.5v-6h-4.5v6h-4.5a1.5 1.5 0 0 1-1.5-1.5V10.5Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -188,30 +188,28 @@
                             'is-active' => request()->routeIs('login'),
                         ])
                         @if (request()->routeIs('login')) aria-current="page" @endif
-                        aria-label="Masuk"
-                        title="Masuk"
+                        aria-label="Login"
+                        title="Login"
                     >
                         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                             <path d="M13.5 4.5h4.25a1.75 1.75 0 0 1 1.75 1.75v11.5a1.75 1.75 0 0 1-1.75 1.75H13.5M10.5 16.5l4.5-4.5-4.5-4.5M15 12H4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </a>
-                    @if (Route::has('register'))
-                        <a
-                            href="{{ route('register') }}"
-                            @class([
-                                'public-bottom-nav-link',
-                                'public-bottom-nav-register',
-                                'is-active' => request()->routeIs('register'),
-                            ])
-                            @if (request()->routeIs('register')) aria-current="page" @endif
-                            aria-label="Daftar"
-                            title="Daftar"
-                        >
-                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                                <path d="M15 20.25v-1.5a3.75 3.75 0 0 0-3.75-3.75h-4.5A3.75 3.75 0 0 0 3 18.75v1.5M9 10.5a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5ZM18 8.25v7.5M21.75 12h-7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                        </a>
-                    @endif
+                @else
+                    <a
+                        href="{{ route('profile.edit') }}"
+                        @class([
+                            'public-bottom-nav-link',
+                            'is-active' => request()->routeIs('profile.*'),
+                        ])
+                        @if (request()->routeIs('profile.*')) aria-current="page" @endif
+                        aria-label="Profil"
+                        title="Profil"
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <path d="M19.5 20.25a7.5 7.5 0 0 0-15 0M12 12a4.125 4.125 0 1 0 0-8.25A4.125 4.125 0 0 0 12 12Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </a>
                 @endguest
             </nav>
         @endunless

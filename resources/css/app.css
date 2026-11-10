@@ -347,17 +347,6 @@ body.dark {
     outline-offset: 2px;
 }
 
-.public-bottom-nav-register {
-    background: var(--primary);
-    color: #ffffff;
-}
-
-.public-bottom-nav-register:hover,
-.public-bottom-nav-register.is-active {
-    background: var(--primary-hover);
-    color: #ffffff;
-}
-
 .page-heading {
     margin-bottom: 24px;
 }
