@@ -13,6 +13,13 @@
 </head>
 
 <body>
+    <div class="page-loading" data-page-loading aria-hidden="true">
+        <div class="page-loading-indicator" role="status" aria-live="polite">
+            <span class="page-loading-spinner" aria-hidden="true"></span>
+            <span>Memuat...</span>
+        </div>
+    </div>
+
     @php($isAdminArea = request()->routeIs('admin.*'))
 
     <div class="app-layout {{ $isAdminArea ? 'admin-layout' : 'public-layout' }}">
