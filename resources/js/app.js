@@ -70,3 +70,38 @@ document.addEventListener('submit', (event) => {
 });
 
 window.addEventListener('pageshow', hidePageLoading);
+
+const passwordVisibilityIcons = {
+    hidden: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.25 12s3.5-6 9.75-6 9.75 6 9.75 6-3.5 6-9.75 6-9.75-6-9.75-6Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.75" stroke="currentColor" stroke-width="1.7"/></svg>',
+    visible: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m3 3 18 18M10.6 6.2A10.7 10.7 0 0 1 12 6c6.25 0 9.75 6 9.75 6a16.2 16.2 0 0 1-3.1 3.65M6.2 6.25C3.65 7.9 2.25 12 2.25 12s3.5 6 9.75 6c1.05 0 2.02-.17 2.92-.46" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+};
+
+document.querySelectorAll('input[type="password"]').forEach((input) => {
+    if (!(input instanceof HTMLInputElement) || input.dataset.passwordToggleReady) {
+        return;
+    }
+
+    input.dataset.passwordToggleReady = 'true';
+
+    const wrapper = document.createElement('span');
+    wrapper.className = 'password-toggle-wrap';
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.append(input);
+
+    const toggle = document.createElement('button');
+    toggle.className = 'password-visibility-toggle';
+    toggle.type = 'button';
+    toggle.setAttribute('aria-label', 'Tampilkan password');
+    toggle.setAttribute('aria-pressed', 'false');
+    toggle.innerHTML = passwordVisibilityIcons.hidden;
+    wrapper.append(toggle);
+
+    toggle.addEventListener('click', () => {
+        const isVisible = input.type === 'text';
+
+        input.type = isVisible ? 'password' : 'text';
+        toggle.setAttribute('aria-label', isVisible ? 'Tampilkan password' : 'Sembunyikan password');
+        toggle.setAttribute('aria-pressed', String(!isVisible));
+        toggle.innerHTML = isVisible ? passwordVisibilityIcons.hidden : passwordVisibilityIcons.visible;
+    });
+});
